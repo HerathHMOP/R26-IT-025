@@ -1,0 +1,33 @@
+const MathActivity = require("../models/MathActivity");
+
+const seedActivities = async () => {
+  await MathActivity.deleteMany();
+
+  await MathActivity.insertMany([
+    {
+      grade: 2,
+      topic: "Counting",
+      title: "Fruit Basket",
+      type: "drag-drop",
+      difficulty: "easy",
+    },
+    {
+      grade: 3,
+      topic: "Multiplication",
+      title: "Group Builder",
+      type: "interactive",
+      difficulty: "medium",
+    },
+    {
+      grade: 4,
+      topic: "Fractions",
+      title: "Pizza Game",
+      type: "simulation",
+      difficulty: "medium",
+    },
+  ]);
+
+  console.log("Seed data inserted");
+};
+
+module.exports = seedActivities;
