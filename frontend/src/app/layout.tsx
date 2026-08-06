@@ -1,15 +1,26 @@
-import './globals.css';
-import type { Metadata } from 'next';
+import { Suspense } from "react";
+import { Nunito } from "next/font/google";
+import { NavigationProgress } from "@/components/NavigationProgress";
+import "./globals.css";
 
-export const metadata: Metadata = {
-  title: 'Modern LMS',
-  description: 'Aptitude test frontend',
-};
+const nunito = Nunito({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-nunito"
+});
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className={nunito.variable}>
+      <body className={nunito.className}>
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
+        {children}
+      </body>
     </html>
   );
 }
