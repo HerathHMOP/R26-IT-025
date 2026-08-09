@@ -336,6 +336,53 @@ export default function Grade2SinhalaAptitudePage() {
     return false;
   }
 
+  useEffect(() => {
+    const current =
+      grade2SinhalaActivities[currentActivityIndex];
+
+    if (!current || !isActivityComplete(current)) {
+      return;
+    }
+
+    if (
+      currentActivityIndex >=
+      grade2SinhalaActivities.length - 1
+    ) {
+      return;
+    }
+
+    setCurrentActivityIndex((prev) =>
+      Math.min(
+        prev + 1,
+        grade2SinhalaActivities.length - 1
+      )
+    );
+  }, [currentActivityIndex, mcqAnswers, matchAnswers]);
+
+  function assignActiveChoice(
+    activityId: number,
+    key: string
+  ) {
+    const current = activeChoice[activityId];
+
+    if (!current) {
+      return;
+    }
+
+    setMatchAnswers((prev) => ({
+      ...prev,
+      [activityId]: {
+        ...(prev[activityId] || {}),
+        [key]: current
+      }
+    }));
+
+    setActiveChoice((prev) => ({
+      ...prev,
+      [activityId]: null
+    }));
+  }
+
   return (
     <main className="dashboard-shell">
       <header className="dashboard-topbar kid-aptitude-topbar">
@@ -384,7 +431,8 @@ export default function Grade2SinhalaAptitudePage() {
               </p>
 
               <p>
-                Total Activities : {grade2SinhalaActivities.length}
+                Total Activities :{" "}
+                {grade2SinhalaActivities.length}
               </p>
 
               <p>
@@ -392,11 +440,12 @@ export default function Grade2SinhalaAptitudePage() {
               </p>
 
               <p>
-                Current Activity : {currentActivityIndex + 1}
+                Current Activity :{" "}
+                {currentActivityIndex + 1}
               </p>
 
               <p>
-                Activity evaluation is ready.
+                Answer matching is ready.
               </p>
 
               <div className="section-top">
