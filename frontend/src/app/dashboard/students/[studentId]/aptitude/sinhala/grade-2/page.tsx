@@ -176,6 +176,166 @@ export default function Grade2SinhalaAptitudePage() {
     return 0;
   }
 
+  const answeredCount = grade2SinhalaActivities.reduce(
+    (count, activity) => {
+      if (activity.type === "mcq") {
+        return count + (mcqAnswers[activity.id] ? 1 : 0);
+      }
+
+      if (activity.type === "image_rows") {
+        const selections = matchAnswers[activity.id] || {};
+
+        return (
+          count +
+          (Object.keys(selections).length ===
+          (activity.imageRows || []).length
+            ? 1
+            : 0)
+        );
+      }
+
+      if (activity.type === "text_rows") {
+        const selections = matchAnswers[activity.id] || {};
+
+        return (
+          count +
+          (Object.keys(selections).length ===
+          (activity.textRows || []).length
+            ? 1
+            : 0)
+        );
+      }
+
+      if (activity.type === "word_boxes") {
+        const selections = matchAnswers[activity.id] || {};
+
+        return (
+          count +
+          (Object.keys(selections).length ===
+          (activity.wordBoxRows || []).length
+            ? 1
+            : 0)
+        );
+      }
+
+      if (activity.type === "match_letters") {
+        const selections = matchAnswers[activity.id] || {};
+
+        return (
+          count +
+          (Object.keys(selections).length ===
+          (activity.leftItems || []).length
+            ? 1
+            : 0)
+        );
+      }
+
+      if (activity.type === "match_pictures") {
+        const selections = matchAnswers[activity.id] || {};
+
+        return (
+          count +
+          (Object.keys(selections).length ===
+          (activity.leftItems || []).length
+            ? 1
+            : 0)
+        );
+      }
+
+      if (activity.type === "arrange_words") {
+        const selections = matchAnswers[activity.id] || {};
+
+        const completeRows = (
+          activity.arrangeWordRows || []
+        ).filter((row) => {
+          const builtWords = (selections[row.key] || "")
+            .split(" | ")
+            .filter(Boolean);
+
+          return builtWords.length === row.words.length;
+        }).length;
+
+        return (
+          count +
+          ((activity.arrangeWordRows || []).length > 0 &&
+          completeRows === (activity.arrangeWordRows || []).length
+            ? 1
+            : 0)
+        );
+      }
+
+      return count;
+    },
+    0
+  );
+
+  function isActivityComplete(
+    activity: (typeof grade2SinhalaActivities)[number]
+  ): boolean {
+    if (activity.type === "mcq") {
+      return Boolean(mcqAnswers[activity.id]);
+    }
+
+    if (activity.type === "image_rows") {
+      const selections = matchAnswers[activity.id] || {};
+
+      return (
+        Object.keys(selections).length ===
+        (activity.imageRows || []).length
+      );
+    }
+
+    if (activity.type === "text_rows") {
+      const selections = matchAnswers[activity.id] || {};
+
+      return (
+        Object.keys(selections).length ===
+        (activity.textRows || []).length
+      );
+    }
+
+    if (activity.type === "word_boxes") {
+      const selections = matchAnswers[activity.id] || {};
+
+      return (
+        Object.keys(selections).length ===
+        (activity.wordBoxRows || []).length
+      );
+    }
+
+    if (activity.type === "match_letters") {
+      const selections = matchAnswers[activity.id] || {};
+
+      return (
+        Object.keys(selections).length ===
+        (activity.leftItems || []).length
+      );
+    }
+
+    if (activity.type === "match_pictures") {
+      const selections = matchAnswers[activity.id] || {};
+
+      return (
+        Object.keys(selections).length ===
+        (activity.leftItems || []).length
+      );
+    }
+
+    if (activity.type === "arrange_words") {
+      const selections = matchAnswers[activity.id] || {};
+
+      return (activity.arrangeWordRows || []).every((row) => {
+        const builtWords = (selections[row.key] || "")
+          .split(" | ")
+          .filter(Boolean);
+
+        return builtWords.length === row.words.length;
+      });
+    }
+
+    return false;
+  }
+
   return (
     <main className="dashboard-shell">
       <header className="dashboard-topbar kid-aptitude-topbar">
@@ -225,6 +385,10 @@ export default function Grade2SinhalaAptitudePage() {
 
               <p>
                 Total Activities : {grade2SinhalaActivities.length}
+              </p>
+
+              <p>
+                Completed Activities : {answeredCount}
               </p>
 
               <p>
