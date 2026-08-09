@@ -88,6 +88,94 @@ export default function Grade2SinhalaAptitudePage() {
     loadStudent();
   }, [router, studentId]);
 
+  function getActivityMark(
+    activity: (typeof grade2SinhalaActivities)[number]
+  ): 0 | 1 {
+    if (activity.type === "mcq") {
+      return mcqAnswers[activity.id] === activity.answer ? 1 : 0;
+    }
+
+    if (activity.type === "image_rows") {
+      const selectedMap = matchAnswers[activity.id] || {};
+
+      const allRowsCorrect =
+        (activity.imageRows || []).length > 0 &&
+        (activity.imageRows || []).every(
+          (row) => selectedMap[row.key] === row.answer
+        );
+
+      return allRowsCorrect ? 1 : 0;
+    }
+
+    if (activity.type === "text_rows") {
+      const selectedMap = matchAnswers[activity.id] || {};
+
+      const allRowsCorrect =
+        (activity.textRows || []).length > 0 &&
+        (activity.textRows || []).every(
+          (row) => selectedMap[row.key] === row.answer
+        );
+
+      return allRowsCorrect ? 1 : 0;
+    }
+
+    if (activity.type === "word_boxes") {
+      const selectedMap = matchAnswers[activity.id] || {};
+
+      const allRowsCorrect =
+        (activity.wordBoxRows || []).length > 0 &&
+        (activity.wordBoxRows || []).every(
+          (row) => selectedMap[row.key] === row.answer
+        );
+
+      return allRowsCorrect ? 1 : 0;
+    }
+
+    if (activity.type === "match_letters") {
+      const selectedMap = matchAnswers[activity.id] || {};
+      const expectedMap = activity.matchAnswerMap || {};
+
+      const allMatched =
+        Object.keys(expectedMap).length > 0 &&
+        Object.entries(expectedMap).every(
+          ([left, right]) => selectedMap[left] === right
+        );
+
+      return allMatched ? 1 : 0;
+    }
+
+    if (activity.type === "match_pictures") {
+      const selectedMap = matchAnswers[activity.id] || {};
+      const expectedMap = activity.matchAnswerMap || {};
+
+      const allMatched =
+        Object.keys(expectedMap).length > 0 &&
+        Object.entries(expectedMap).every(
+          ([left, right]) => selectedMap[left] === right
+        );
+
+      return allMatched ? 1 : 0;
+    }
+
+    if (activity.type === "arrange_words") {
+      const selectedMap = matchAnswers[activity.id] || {};
+
+      const allRowsCorrect =
+        (activity.arrangeWordRows || []).length > 0 &&
+        (activity.arrangeWordRows || []).every((row) => {
+          const builtWords = (selectedMap[row.key] || "")
+            .split(" | ")
+            .filter(Boolean);
+
+          return builtWords.join(" ") === row.answer;
+        });
+
+      return allRowsCorrect ? 1 : 0;
+    }
+
+    return 0;
+  }
+
   return (
     <main className="dashboard-shell">
       <header className="dashboard-topbar kid-aptitude-topbar">
@@ -141,6 +229,10 @@ export default function Grade2SinhalaAptitudePage() {
 
               <p>
                 Current Activity : {currentActivityIndex + 1}
+              </p>
+
+              <p>
+                Activity evaluation is ready.
               </p>
 
               <div className="section-top">
