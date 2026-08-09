@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getStoredUser, getStudentDashboard } from "@/lib/api";
+
+import {
+  completeExamSession,
+  getStoredUser,
+  getStudentDashboard,
+  startExamSession,
+  type CompleteExamSessionResponse
+} from "@/lib/api";
+
+import { grade2SinhalaActivities } from "@/lib/grade2SinhalaAptitude";
 
 export default function Grade2SinhalaAptitudePage() {
   const params = useParams<{ studentId: string }>();
@@ -18,6 +27,23 @@ export default function Grade2SinhalaAptitudePage() {
   const [grade, setGrade] = useState<number | null>(null);
   const [subjectId, setSubjectId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const [mcqAnswers, setMcqAnswers] = useState<Record<number, string>>({});
+
+  const [matchAnswers, setMatchAnswers] = useState<
+    Record<number, Record<string, string>>
+  >({});
+
+  const [activeChoice, setActiveChoice] = useState<
+    Record<number, string | null>
+  >({});
+
+  const [currentActivityIndex, setCurrentActivityIndex] = useState(0);
+
+  const [submitting, setSubmitting] = useState(false);
+
+  const [result, setResult] =
+    useState<CompleteExamSessionResponse | null>(null);
 
   useEffect(() => {
     const user = getStoredUser();
@@ -66,7 +92,9 @@ export default function Grade2SinhalaAptitudePage() {
     <main className="dashboard-shell">
       <header className="dashboard-topbar kid-aptitude-topbar">
         <div>
-          <h1 className="title">Grade 2 Sinhala Aptitude Test</h1>
+          <h1 className="title">
+            Grade 2 Sinhala Aptitude Test
+          </h1>
 
           <p className="subtitle">
             Student : <strong>{studentName}</strong>
@@ -89,7 +117,11 @@ export default function Grade2SinhalaAptitudePage() {
 
       <section className="dashboard-content dashboard-content-single">
         <section className="dashboard-panel dashboard-main-panel">
-          {error && <p className="error-text">{error}</p>}
+          {error && (
+            <p className="error-text">
+              {error}
+            </p>
+          )}
 
           {!error && (
             <>
@@ -99,7 +131,17 @@ export default function Grade2SinhalaAptitudePage() {
                 Student profile loaded successfully.
               </p>
 
-              <p>Subject ID : {subjectId ?? "-"}</p>
+              <p>
+                Subject ID : {subjectId ?? "-"}
+              </p>
+
+              <p>
+                Total Activities : {grade2SinhalaActivities.length}
+              </p>
+
+              <p>
+                Current Activity : {currentActivityIndex + 1}
+              </p>
 
               <div className="section-top">
                 <Link
