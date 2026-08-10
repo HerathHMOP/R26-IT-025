@@ -101,3 +101,16 @@ main {
 .match-target-filled {
   border-style: solid;
 }
+
+.kid-submit-btn {
+  width: 100%;
+  max-width: 320px;
+}
+
+.kid-result-card {
+  padding: 24px;
+}
+
+.kid-result-title {
+  margin-top: 0;
+}
