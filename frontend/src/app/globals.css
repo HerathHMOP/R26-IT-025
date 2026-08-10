@@ -10,3 +10,36 @@ main {
   max-width: 960px;
   margin: 0 auto;
 }
+
+/* Grade 2 Sinhala Aptitude Page */
+
+.kid-aptitude-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.kid-aptitude-title {
+  margin: 0;
+}
+
+.kid-aptitude-subtitle {
+  margin-top: 8px;
+}
+
+.kid-aptitude-card {
+  padding: 24px;
+}
+
+.kid-aptitude-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kid-aptitude-prompt {
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.6;
+}
