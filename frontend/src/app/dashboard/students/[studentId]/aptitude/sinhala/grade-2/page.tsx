@@ -28,17 +28,17 @@ export default function Grade2SinhalaAptitudePage() {
   const [subjectId, setSubjectId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [mcqAnswers, setMcqAnswers] = useState<Record<number, string>>({});
+  const [mcqAnswers, setMcqAnswers] =
+    useState<Record<number, string>>({});
 
-  const [matchAnswers, setMatchAnswers] = useState<
-    Record<number, Record<string, string>>
-  >({});
+  const [matchAnswers, setMatchAnswers] =
+    useState<Record<number, Record<string, string>>>({});
 
-  const [activeChoice, setActiveChoice] = useState<
-    Record<number, string | null>
-  >({});
+  const [activeChoice, setActiveChoice] =
+    useState<Record<number, string | null>>({});
 
-  const [currentActivityIndex, setCurrentActivityIndex] = useState(0);
+  const [currentActivityIndex, setCurrentActivityIndex] =
+    useState(0);
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -258,7 +258,8 @@ export default function Grade2SinhalaAptitudePage() {
         return (
           count +
           ((activity.arrangeWordRows || []).length > 0 &&
-          completeRows === (activity.arrangeWordRows || []).length
+          completeRows ===
+            (activity.arrangeWordRows || []).length
             ? 1
             : 0)
         );
@@ -383,6 +384,47 @@ export default function Grade2SinhalaAptitudePage() {
     }));
   }
 
+  async function handleSubmit() {
+    if (!studentId || grade !== 2) {
+      return;
+    }
+
+    setError(null);
+    setSubmitting(true);
+
+    try {
+      const correctAnswers =
+        grade2SinhalaActivities.reduce(
+          (count, activity) =>
+            count + getActivityMark(activity),
+          0
+        );
+
+      const session = await startExamSession(
+        studentId,
+        grade2SinhalaActivities.length
+      );
+
+      const finalResult =
+        await completeExamSession(
+          session.exam_session_id,
+          correctAnswers,
+          subjectId ?? undefined,
+          grade2SinhalaActivities.length
+        );
+
+      setResult(finalResult);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to submit aptitude test"
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <main className="dashboard-shell">
       <header className="dashboard-topbar kid-aptitude-topbar">
@@ -412,6 +454,7 @@ export default function Grade2SinhalaAptitudePage() {
 
       <section className="dashboard-content dashboard-content-single">
         <section className="dashboard-panel dashboard-main-panel">
+
           {error && (
             <p className="error-text">
               {error}
@@ -444,9 +487,20 @@ export default function Grade2SinhalaAptitudePage() {
                 {currentActivityIndex + 1}
               </p>
 
-              <p>
-                Answer matching is ready.
-              </p>
+              {answeredCount ===
+                grade2SinhalaActivities.length && (
+                <button
+                  type="button"
+                  className="btn kid-submit-btn section-top"
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  aria-busy={submitting}
+                >
+                  {submitting
+                    ? "Submitting..."
+                    : "Submit Aptitude Test"}
+                </button>
+              )}
 
               <div className="section-top">
                 <Link
