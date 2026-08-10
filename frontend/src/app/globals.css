@@ -71,3 +71,33 @@ main {
 .number-option-btn-selected {
   border-color: var(--primary);
 }
+
+.match-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.match-row {
+  display: grid;
+  grid-template-columns: 1fr auto minmax(150px, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.match-left {
+  font-weight: 700;
+}
+
+.match-arrow {
+  font-weight: 800;
+}
+
+.match-target {
+  min-height: 44px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.match-target-filled {
+  border-style: solid;
+}
