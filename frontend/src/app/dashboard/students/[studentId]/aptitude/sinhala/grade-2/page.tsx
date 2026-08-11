@@ -12,6 +12,18 @@ import {
   type CompleteExamSessionResponse
 } from "@/lib/api";
 
+import {
+  playZoneDoneTitle,
+  playZoneEyebrow,
+  playZoneFinishedLine,
+  playZoneKicker,
+  playZoneMainClassNames,
+  playZoneStepBadge,
+  playZoneSubtitle,
+  playZoneTitle,
+  type AptitudeUiLang
+} from "@/lib/aptitudePlayZone";
+
 import { grade2SinhalaActivities } from "@/lib/grade2SinhalaAptitude";
 
 export default function Grade2SinhalaAptitudePage() {
@@ -28,21 +40,25 @@ export default function Grade2SinhalaAptitudePage() {
   const [studentName, setStudentName] = useState("Student");
   const [grade, setGrade] = useState<number | null>(null);
   const [subjectId, setSubjectId] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  const [mcqAnswers, setMcqAnswers] =
-    useState<Record<number, string>>({});
+  const [mcqAnswers, setMcqAnswers] = useState<
+    Record<number, string>
+  >({});
 
-  const [matchAnswers, setMatchAnswers] =
-    useState<Record<number, Record<string, string>>>({});
+  const [matchAnswers, setMatchAnswers] = useState<
+    Record<number, Record<string, string>>
+  >({});
 
-  const [activeChoice, setActiveChoice] =
-    useState<Record<number, string | null>>({});
+  const [activeChoice, setActiveChoice] = useState<
+    Record<number, string | null>
+  >({});
 
   const [currentActivityIndex, setCurrentActivityIndex] =
     useState(0);
 
   const [submitting, setSubmitting] = useState(false);
+
+  const [error, setError] = useState<string | null>(null);
 
   const [result, setResult] =
     useState<CompleteExamSessionResponse | null>(null);
@@ -62,14 +78,21 @@ export default function Grade2SinhalaAptitudePage() {
 
     async function loadStudent() {
       try {
-        const dashboard = await getStudentDashboard(studentId);
+        const dashboard =
+          await getStudentDashboard(studentId);
 
-        setStudentName(dashboard.student.full_name);
-        setGrade(dashboard.student.grade);
+        setStudentName(
+          dashboard.student.full_name
+        );
+
+        setGrade(
+          dashboard.student.grade
+        );
 
         setSubjectId(
           dashboard.subjects.find(
-            (subject) => subject.code === "sinhala"
+            (subject) =>
+              subject.code === "sinhala"
           )?.id ?? null
         );
 
@@ -94,83 +117,112 @@ export default function Grade2SinhalaAptitudePage() {
     activity: (typeof grade2SinhalaActivities)[number]
   ): 0 | 1 {
     if (activity.type === "mcq") {
-      return mcqAnswers[activity.id] === activity.answer ? 1 : 0;
+      return mcqAnswers[activity.id] ===
+        activity.answer
+        ? 1
+        : 0;
     }
 
     if (activity.type === "image_rows") {
-      const selectedMap = matchAnswers[activity.id] || {};
+      const selectedMap =
+        matchAnswers[activity.id] || {};
 
       const allRowsCorrect =
         (activity.imageRows || []).length > 0 &&
         (activity.imageRows || []).every(
-          (row) => selectedMap[row.key] === row.answer
+          (row) =>
+            selectedMap[row.key] ===
+            row.answer
         );
 
       return allRowsCorrect ? 1 : 0;
     }
 
     if (activity.type === "text_rows") {
-      const selectedMap = matchAnswers[activity.id] || {};
+      const selectedMap =
+        matchAnswers[activity.id] || {};
 
       const allRowsCorrect =
         (activity.textRows || []).length > 0 &&
         (activity.textRows || []).every(
-          (row) => selectedMap[row.key] === row.answer
+          (row) =>
+            selectedMap[row.key] ===
+            row.answer
         );
 
       return allRowsCorrect ? 1 : 0;
     }
 
     if (activity.type === "word_boxes") {
-      const selectedMap = matchAnswers[activity.id] || {};
+      const selectedMap =
+        matchAnswers[activity.id] || {};
 
       const allRowsCorrect =
         (activity.wordBoxRows || []).length > 0 &&
         (activity.wordBoxRows || []).every(
-          (row) => selectedMap[row.key] === row.answer
+          (row) =>
+            selectedMap[row.key] ===
+            row.answer
         );
 
       return allRowsCorrect ? 1 : 0;
     }
 
     if (activity.type === "match_letters") {
-      const selectedMap = matchAnswers[activity.id] || {};
-      const expectedMap = activity.matchAnswerMap || {};
+      const selectedMap =
+        matchAnswers[activity.id] || {};
+
+      const expectedMap =
+        activity.matchAnswerMap || {};
 
       const allMatched =
         Object.keys(expectedMap).length > 0 &&
         Object.entries(expectedMap).every(
-          ([left, right]) => selectedMap[left] === right
+          ([left, right]) =>
+            selectedMap[left] === right
         );
 
       return allMatched ? 1 : 0;
     }
 
     if (activity.type === "match_pictures") {
-      const selectedMap = matchAnswers[activity.id] || {};
-      const expectedMap = activity.matchAnswerMap || {};
+      const selectedMap =
+        matchAnswers[activity.id] || {};
+
+      const expectedMap =
+        activity.matchAnswerMap || {};
 
       const allMatched =
         Object.keys(expectedMap).length > 0 &&
         Object.entries(expectedMap).every(
-          ([left, right]) => selectedMap[left] === right
+          ([left, right]) =>
+            selectedMap[left] === right
         );
 
       return allMatched ? 1 : 0;
     }
 
     if (activity.type === "arrange_words") {
-      const selectedMap = matchAnswers[activity.id] || {};
+      const selectedMap =
+        matchAnswers[activity.id] || {};
 
       const allRowsCorrect =
-        (activity.arrangeWordRows || []).length > 0 &&
-        (activity.arrangeWordRows || []).every((row) => {
-          const builtWords = (selectedMap[row.key] || "")
-            .split(WORD_SEPARATOR)
-            .filter(Boolean);
+        (activity.arrangeWordRows || []).length >
+          0 &&
+        (activity.arrangeWordRows || []).every(
+          (row) => {
+            const builtWords = (
+              selectedMap[row.key] || ""
+            )
+              .split(WORD_SEPARATOR)
+              .filter(Boolean);
 
-          return builtWords.join(" ") === row.answer;
-        });
+            return (
+              builtWords.join(" ") ===
+              row.answer
+            );
+          }
+        );
 
       return allRowsCorrect ? 1 : 0;
     }
@@ -178,109 +230,141 @@ export default function Grade2SinhalaAptitudePage() {
     return 0;
   }
 
-  const answeredCount = grade2SinhalaActivities.reduce(
-    (count, activity) => {
-      if (activity.type === "mcq") {
-        return count + (mcqAnswers[activity.id] ? 1 : 0);
-      }
+  const answeredCount =
+    grade2SinhalaActivities.reduce(
+      (count, activity) => {
+        if (activity.type === "mcq") {
+          return (
+            count +
+            (mcqAnswers[activity.id]
+              ? 1
+              : 0)
+          );
+        }
 
-      if (activity.type === "image_rows") {
-        const selections = matchAnswers[activity.id] || {};
+        if (activity.type === "image_rows") {
+          const selections =
+            matchAnswers[activity.id] || {};
 
-        return (
-          count +
-          (Object.keys(selections).length ===
-          (activity.imageRows || []).length
-            ? 1
-            : 0)
-        );
-      }
+          return (
+            count +
+            (Object.keys(selections)
+              .length ===
+            (activity.imageRows || [])
+              .length
+              ? 1
+              : 0)
+          );
+        }
 
-      if (activity.type === "text_rows") {
-        const selections = matchAnswers[activity.id] || {};
+        if (activity.type === "text_rows") {
+          const selections =
+            matchAnswers[activity.id] || {};
 
-        return (
-          count +
-          (Object.keys(selections).length ===
-          (activity.textRows || []).length
-            ? 1
-            : 0)
-        );
-      }
+          return (
+            count +
+            (Object.keys(selections)
+              .length ===
+            (activity.textRows || [])
+              .length
+              ? 1
+              : 0)
+          );
+        }
 
-      if (activity.type === "word_boxes") {
-        const selections = matchAnswers[activity.id] || {};
+        if (activity.type === "word_boxes") {
+          const selections =
+            matchAnswers[activity.id] || {};
 
-        return (
-          count +
-          (Object.keys(selections).length ===
-          (activity.wordBoxRows || []).length
-            ? 1
-            : 0)
-        );
-      }
+          return (
+            count +
+            (Object.keys(selections)
+              .length ===
+            (activity.wordBoxRows || [])
+              .length
+              ? 1
+              : 0)
+          );
+        }
 
-      if (activity.type === "match_letters") {
-        const selections = matchAnswers[activity.id] || {};
+        if (activity.type === "match_letters") {
+          const selections =
+            matchAnswers[activity.id] || {};
 
-        return (
-          count +
-          (Object.keys(selections).length ===
-          (activity.leftItems || []).length
-            ? 1
-            : 0)
-        );
-      }
+          return (
+            count +
+            (Object.keys(selections)
+              .length ===
+            (activity.leftItems || [])
+              .length
+              ? 1
+              : 0)
+          );
+        }
 
-      if (activity.type === "match_pictures") {
-        const selections = matchAnswers[activity.id] || {};
+        if (activity.type === "match_pictures") {
+          const selections =
+            matchAnswers[activity.id] || {};
 
-        return (
-          count +
-          (Object.keys(selections).length ===
-          (activity.leftItems || []).length
-            ? 1
-            : 0)
-        );
-      }
+          return (
+            count +
+            (Object.keys(selections)
+              .length ===
+            (activity.leftItems || [])
+              .length
+              ? 1
+              : 0)
+          );
+        }
 
-      if (activity.type === "arrange_words") {
-        const selections = matchAnswers[activity.id] || {};
+        if (activity.type === "arrange_words") {
+          const selections =
+            matchAnswers[activity.id] || {};
 
-        const completeRows = (
-          activity.arrangeWordRows || []
-        ).filter((row) => {
-          const builtWords = (selections[row.key] || "")
-            .split(WORD_SEPARATOR)
-            .filter(Boolean);
+          const completeRows = (
+            activity.arrangeWordRows || []
+          ).filter((row) => {
+            const builtWords = (
+              selections[row.key] || ""
+            )
+              .split(WORD_SEPARATOR)
+              .filter(Boolean);
 
-          return builtWords.length === row.words.length;
-        }).length;
+            return (
+              builtWords.length ===
+              row.words.length
+            );
+          }).length;
 
-        return (
-          count +
-          ((activity.arrangeWordRows || []).length > 0 &&
-          completeRows ===
-            (activity.arrangeWordRows || []).length
-            ? 1
-            : 0)
-        );
-      }
+          return (
+            count +
+            ((activity.arrangeWordRows || [])
+              .length > 0 &&
+            completeRows ===
+              (activity.arrangeWordRows || [])
+                .length
+              ? 1
+              : 0)
+          );
+        }
 
-      return count;
-    },
-    0
-  );
+        return count;
+      },
+      0
+    );
 
   function isActivityComplete(
     activity: (typeof grade2SinhalaActivities)[number]
   ): boolean {
     if (activity.type === "mcq") {
-      return Boolean(mcqAnswers[activity.id]);
+      return Boolean(
+        mcqAnswers[activity.id]
+      );
     }
 
     if (activity.type === "image_rows") {
-      const selections = matchAnswers[activity.id] || {};
+      const selections =
+        matchAnswers[activity.id] || {};
 
       return (
         Object.keys(selections).length ===
@@ -289,7 +373,8 @@ export default function Grade2SinhalaAptitudePage() {
     }
 
     if (activity.type === "text_rows") {
-      const selections = matchAnswers[activity.id] || {};
+      const selections =
+        matchAnswers[activity.id] || {};
 
       return (
         Object.keys(selections).length ===
@@ -298,7 +383,8 @@ export default function Grade2SinhalaAptitudePage() {
     }
 
     if (activity.type === "word_boxes") {
-      const selections = matchAnswers[activity.id] || {};
+      const selections =
+        matchAnswers[activity.id] || {};
 
       return (
         Object.keys(selections).length ===
@@ -307,7 +393,8 @@ export default function Grade2SinhalaAptitudePage() {
     }
 
     if (activity.type === "match_letters") {
-      const selections = matchAnswers[activity.id] || {};
+      const selections =
+        matchAnswers[activity.id] || {};
 
       return (
         Object.keys(selections).length ===
@@ -316,7 +403,8 @@ export default function Grade2SinhalaAptitudePage() {
     }
 
     if (activity.type === "match_pictures") {
-      const selections = matchAnswers[activity.id] || {};
+      const selections =
+        matchAnswers[activity.id] || {};
 
       return (
         Object.keys(selections).length ===
@@ -325,14 +413,22 @@ export default function Grade2SinhalaAptitudePage() {
     }
 
     if (activity.type === "arrange_words") {
-      const selections = matchAnswers[activity.id] || {};
+      const selections =
+        matchAnswers[activity.id] || {};
 
-      return (activity.arrangeWordRows || []).every((row) => {
-        const builtWords = (selections[row.key] || "")
+      return (
+        activity.arrangeWordRows || []
+      ).every((row) => {
+        const builtWords = (
+          selections[row.key] || ""
+        )
           .split(WORD_SEPARATOR)
           .filter(Boolean);
 
-        return builtWords.length === row.words.length;
+        return (
+          builtWords.length ===
+          row.words.length
+        );
       });
     }
 
@@ -341,9 +437,14 @@ export default function Grade2SinhalaAptitudePage() {
 
   useEffect(() => {
     const current =
-      grade2SinhalaActivities[currentActivityIndex];
+      grade2SinhalaActivities[
+        currentActivityIndex
+      ];
 
-    if (!current || !isActivityComplete(current)) {
+    if (
+      !current ||
+      !isActivityComplete(current)
+    ) {
       return;
     }
 
@@ -360,13 +461,18 @@ export default function Grade2SinhalaAptitudePage() {
         grade2SinhalaActivities.length - 1
       )
     );
-  }, [currentActivityIndex, mcqAnswers, matchAnswers]);
+  }, [
+    currentActivityIndex,
+    mcqAnswers,
+    matchAnswers
+  ]);
 
   function assignActiveChoice(
     activityId: number,
     key: string
   ) {
-    const current = activeChoice[activityId];
+    const current =
+      activeChoice[activityId];
 
     if (!current) {
       return;
@@ -398,14 +504,16 @@ export default function Grade2SinhalaAptitudePage() {
       const correctAnswers =
         grade2SinhalaActivities.reduce(
           (count, activity) =>
-            count + getActivityMark(activity),
+            count +
+            getActivityMark(activity),
           0
         );
 
-      const session = await startExamSession(
-        studentId,
-        grade2SinhalaActivities.length
-      );
+      const session =
+        await startExamSession(
+          studentId,
+          grade2SinhalaActivities.length
+        );
 
       const finalResult =
         await completeExamSession(
@@ -427,24 +535,52 @@ export default function Grade2SinhalaAptitudePage() {
     }
   }
 
+  const uiLang: AptitudeUiLang =
+    "sinhala";
+
+  const answeredLine =
+    playZoneFinishedLine(
+      answeredCount,
+      grade2SinhalaActivities.length,
+      uiLang
+    );
+
   return (
-    <main className="dashboard-screen kid-aptitude-play">
+    <main
+      className={playZoneMainClassNames(
+        uiLang
+      )}
+    >
       <header className="dashboard-topbar kid-aptitude-topbar">
         <div>
           <p className="dashboard-eyebrow kid-aptitude-eyebrow">
-            සිංහල
+            {playZoneEyebrow(
+              "sinhala",
+              uiLang
+            )}
           </p>
 
           <h1 className="title dashboard-title kid-aptitude-title">
-            Grade 2 Sinhala Aptitude Test
+            {playZoneTitle(
+              2,
+              "sinhala",
+              uiLang
+            )}
           </h1>
 
           <p className="kid-aptitude-kicker">
-            Sinhala Learning Activities
+            {playZoneKicker(
+              "sinhala",
+              uiLang
+            )}
           </p>
 
           <p className="subtitle kid-aptitude-subtitle">
-            Student : <strong>{studentName}</strong>
+            {playZoneSubtitle(
+              studentName,
+              grade2SinhalaActivities.length,
+              uiLang
+            )}
           </p>
         </div>
 
@@ -467,25 +603,30 @@ export default function Grade2SinhalaAptitudePage() {
             </p>
           ) : null}
 
+          {/* COMMIT 12: DISPLAY TEST RESULT */}
           {result ? (
             <section className="dashboard-item kid-result-card">
               <h2 className="dashboard-panel-title kid-result-title">
-                Aptitude Test Completed
+                {playZoneDoneTitle(uiLang)}
               </h2>
 
               <p className="student-meta">
-                Score: {result.correct_answers}/
-                {result.total_activities} (
-                {result.score_percent}%)
+                Score:{" "}
+                {result.correct_answers}/
+                {result.total_activities}{" "}
+                ({result.score_percent}%)
               </p>
 
               <p className="student-meta">
-                Eligible level: {result.eligible_level}
+                Eligible level:{" "}
+                {result.eligible_level}
               </p>
 
               <p className="student-meta">
                 Unlocked levels:{" "}
-                {result.eligible_levels.join(", ")}
+                {result.eligible_levels.join(
+                  ", "
+                )}
               </p>
 
               <div className="section-top">
@@ -505,7 +646,7 @@ export default function Grade2SinhalaAptitudePage() {
               <div className="subject-item-header kid-aptitude-card-header">
                 <span
                   className="kid-activity-badge"
-                  title="Current Activity"
+                  title="වත්මන් පියවර"
                 >
                   <span
                     className="kid-activity-badge-emoji"
@@ -514,15 +655,16 @@ export default function Grade2SinhalaAptitudePage() {
                     ★
                   </span>
 
-                  Activity{" "}
-                  {currentActivityIndex + 1} /{" "}
-                  {grade2SinhalaActivities.length}
+                  {playZoneStepBadge(
+                    currentActivityIndex,
+                    grade2SinhalaActivities.length,
+                    uiLang
+                  )}
                 </span>
               </div>
 
               <p className="student-meta kid-aptitude-answered-line section-top">
-                Completed Activities: {answeredCount} /{" "}
-                {grade2SinhalaActivities.length}
+                {answeredLine}
               </p>
 
               <div className="students-grid section-top">
@@ -544,131 +686,302 @@ export default function Grade2SinhalaAptitudePage() {
                         {activity.prompt}
                       </p>
 
-                      {activity.type === "image_rows" ? (
+                      {activity.type ===
+                      "image_rows" ? (
                         <div className="number-rows-grid section-top">
 
                           <div className="choice-pool">
                             {Array.from(
                               new Set(
-                                (activity.imageRows || []).flatMap(
-                                  (row) => row.options
+                                (
+                                  activity.imageRows ||
+                                  []
+                                ).flatMap(
+                                  (row) =>
+                                    row.options
                                 )
                               )
-                            ).map((word) => {
+                            ).map(
+                              (word) => {
+                                const selected =
+                                  activeChoice[
+                                    activity.id
+                                  ] === word;
 
-                              const selected =
-                                activeChoice[
-                                  activity.id
-                                ] === word;
-
-                              return (
-                                <button
-                                  key={`img-pool-${word}`}
-                                  type="button"
-                                  className={`number-option-btn ${
-                                    selected
-                                      ? "number-option-btn-selected"
-                                      : ""
-                                  }`}
-                                  onClick={() =>
-                                    setActiveChoice(
-                                      (prev) => ({
-                                        ...prev,
-                                        [activity.id]:
-                                          selected
-                                            ? null
-                                            : word
-                                      })
-                                    )
-                                  }
-                                >
-                                  {word}
-                                </button>
-                              );
-                            })}
+                                return (
+                                  <button
+                                    key={`img-pool-${word}`}
+                                    type="button"
+                                    className={`number-option-btn ${
+                                      selected
+                                        ? "number-option-btn-selected"
+                                        : ""
+                                    }`}
+                                    onClick={() =>
+                                      setActiveChoice(
+                                        (
+                                          prev
+                                        ) => ({
+                                          ...prev,
+                                          [activity.id]:
+                                            selected
+                                              ? null
+                                              : word
+                                        })
+                                      )
+                                    }
+                                  >
+                                    {word}
+                                  </button>
+                                );
+                              }
+                            )}
                           </div>
 
                           <p className="student-meta">
-                            Tap a word above, then tap the
-                            matching picture.
+                            Tap a word above, then tap the matching picture.
                           </p>
 
-                          {(activity.imageRows || []).map(
-                            (row) => (
-                              <div
-                                key={row.key}
-                                className="number-row-card"
+                          {(
+                            activity.imageRows ||
+                            []
+                          ).map((row) => (
+                            <div
+                              key={row.key}
+                              className="number-row-card"
+                            >
+                              {row.label ? (
+                                <div className="match-left">
+                                  {row.label}
+                                </div>
+                              ) : null}
+
+                              <button
+                                type="button"
+                                className="number-badge"
+                                onClick={() =>
+                                  assignActiveChoice(
+                                    activity.id,
+                                    row.key
+                                  )
+                                }
                               >
-                                {row.label ? (
-                                  <div className="match-left">
-                                    {row.label}
-                                  </div>
-                                ) : null}
+                                <img
+                                  src={row.image}
+                                  alt={row.key}
+                                  className="number-badge-image"
+                                />
+                              </button>
 
-                                <button
-                                  type="button"
-                                  className="number-badge"
-                                  onClick={() =>
-                                    assignActiveChoice(
-                                      activity.id,
-                                      row.key
-                                    )
-                                  }
-                                >
-                                  <img
-                                    src={row.image}
-                                    alt={row.key}
-                                    className="number-badge-image"
-                                  />
-                                </button>
-
-                                <button
-                                  type="button"
-                                  className={`match-target ${
-                                    matchAnswers[
-                                      activity.id
-                                    ]?.[row.key]
-                                      ? "match-target-filled"
-                                      : ""
-                                  }`}
-                                  onClick={() =>
-                                    assignActiveChoice(
-                                      activity.id,
-                                      row.key
-                                    )
-                                  }
-                                >
-                                  {matchAnswers[
+                              <button
+                                type="button"
+                                className={`match-target ${
+                                  matchAnswers[
                                     activity.id
-                                  ]?.[row.key] ||
-                                    "Tap to assign word"}
-                                </button>
-                              </div>
-                            )
-                          )}
+                                  ]?.[
+                                    row.key
+                                  ]
+                                    ? "match-target-filled"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  assignActiveChoice(
+                                    activity.id,
+                                    row.key
+                                  )
+                                }
+                              >
+                                {matchAnswers[
+                                  activity.id
+                                ]?.[row.key] ||
+                                  "Tap to assign word"}
+                              </button>
+                            </div>
+                          ))}
                         </div>
-
-                      ) : activity.type === "text_rows" ? (
+                      ) : activity.type ===
+                        "text_rows" ? (
                         <div className="number-rows-grid section-top">
 
-                          {(activity.textRows || []).map(
-                            (row) => (
+                          {(
+                            activity.textRows ||
+                            []
+                          ).map((row) => (
+                            <div
+                              key={row.key}
+                              className="number-row-card"
+                            >
+                              <div className="match-left">
+                                {row.prompt}
+                              </div>
+
+                              <div className="choice-pool">
+                                {row.options.map(
+                                  (option) => {
+                                    const selected =
+                                      matchAnswers[
+                                        activity.id
+                                      ]?.[
+                                        row.key
+                                      ] ===
+                                      option;
+
+                                    return (
+                                      <button
+                                        key={`${row.key}-${option}`}
+                                        type="button"
+                                        className={`number-option-btn ${
+                                          selected
+                                            ? "number-option-btn-selected"
+                                            : ""
+                                        }`}
+                                        onClick={() =>
+                                          setMatchAnswers(
+                                            (
+                                              prev
+                                            ) => ({
+                                              ...prev,
+                                              [activity.id]:
+                                                {
+                                                  ...(prev[
+                                                    activity.id
+                                                  ] ||
+                                                    {}),
+                                                  [row.key]:
+                                                    option
+                                                }
+                                            })
+                                          )
+                                        }
+                                      >
+                                        {option}
+                                      </button>
+                                    );
+                                  }
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : activity.type ===
+                        "word_boxes" ? (
+                        <div className="number-rows-grid section-top">
+
+                          {(
+                            activity.wordBoxRows ||
+                            []
+                          ).map((row) => {
+                            const pattern =
+                              row.patternRows ||
+                              [
+                                [
+                                  row.topRow[0],
+                                  row.topRow[1],
+                                  row.topRow[2]
+                                ],
+                                [
+                                  row.sideColumn[0]
+                                ],
+                                [
+                                  row.sideColumn[1]
+                                ]
+                              ];
+
+                            const blankCell =
+                              row.blankCell || {
+                                row: 0,
+                                col: 0
+                              };
+
+                            const colCount =
+                              Math.max(
+                                ...pattern.map(
+                                  (cells) =>
+                                    cells.length
+                                )
+                              );
+
+                            return (
                               <div
                                 key={row.key}
-                                className="number-row-card"
+                                className="word-box-row-card"
                               >
-                                <div className="match-left">
-                                  {row.prompt}
+                                <div
+                                  className="word-box-shape"
+                                  style={{
+                                    gridTemplateColumns:
+                                      `repeat(${colCount}, 42px)`
+                                  }}
+                                >
+                                  {pattern.flatMap(
+                                    (
+                                      cells,
+                                      rowIdx
+                                    ) =>
+                                      Array.from(
+                                        {
+                                          length:
+                                            colCount
+                                        }
+                                      ).map(
+                                        (
+                                          _,
+                                          colIdx
+                                        ) => {
+                                          const value =
+                                            cells[
+                                              colIdx
+                                            ] ??
+                                            null;
+
+                                          if (
+                                            value ==
+                                            null
+                                          ) {
+                                            return (
+                                              <div
+                                                key={`${row.key}-${rowIdx}-${colIdx}`}
+                                                className="word-box-empty"
+                                              />
+                                            );
+                                          }
+
+                                          const isBlank =
+                                            blankCell.row ===
+                                              rowIdx &&
+                                            blankCell.col ===
+                                              colIdx;
+
+                                          return (
+                                            <div
+                                              key={`${row.key}-${rowIdx}-${colIdx}`}
+                                              className="word-box-cell"
+                                            >
+                                              {isBlank
+                                                ? matchAnswers[
+                                                    activity
+                                                      .id
+                                                  ]?.[
+                                                    row.key
+                                                  ] ||
+                                                  value
+                                                : value}
+                                            </div>
+                                          );
+                                        }
+                                      )
+                                  )}
                                 </div>
 
                                 <div className="choice-pool">
                                   {row.options.map(
                                     (option) => {
-
                                       const selected =
                                         matchAnswers[
                                           activity.id
-                                        ]?.[row.key] ===
+                                        ]?.[
+                                          row.key
+                                        ] ===
                                         option;
 
                                       return (
@@ -682,13 +995,16 @@ export default function Grade2SinhalaAptitudePage() {
                                           }`}
                                           onClick={() =>
                                             setMatchAnswers(
-                                              (prev) => ({
+                                              (
+                                                prev
+                                              ) => ({
                                                 ...prev,
                                                 [activity.id]:
                                                   {
                                                     ...(prev[
                                                       activity.id
-                                                    ] || {}),
+                                                    ] ||
+                                                      {}),
                                                     [row.key]:
                                                       option
                                                   }
@@ -702,351 +1018,214 @@ export default function Grade2SinhalaAptitudePage() {
                                     }
                                   )}
                                 </div>
+
+                                <p className="student-meta">
+                                  {row.optionHint ||
+                                    `(${row.options.join(
+                                      " / "
+                                    )})`}
+                                </p>
                               </div>
-                            )
-                          )}
+                            );
+                          })}
                         </div>
-
-                      ) : activity.type === "word_boxes" ? (
-                        <div className="number-rows-grid section-top">
-
-                          {(activity.wordBoxRows || []).map(
-                            (row) => {
-
-                              const pattern =
-                                row.patternRows ||
-                                [
-                                  [
-                                    row.topRow[0],
-                                    row.topRow[1],
-                                    row.topRow[2]
-                                  ],
-                                  [row.sideColumn[0]],
-                                  [row.sideColumn[1]]
-                                ];
-
-                              const blankCell =
-                                row.blankCell || {
-                                  row: 0,
-                                  col: 0
-                                };
-
-                              const colCount =
-                                Math.max(
-                                  ...pattern.map(
-                                    (cells) =>
-                                      cells.length
-                                  )
-                                );
-
-                              return (
-                                <div
-                                  key={row.key}
-                                  className="word-box-row-card"
-                                >
-
-                                  <div
-                                    className="word-box-shape"
-                                    style={{
-                                      gridTemplateColumns:
-                                        `repeat(${colCount}, 42px)`
-                                    }}
-                                  >
-                                    {pattern.flatMap(
-                                      (
-                                        cells,
-                                        rowIdx
-                                      ) =>
-                                        Array.from({
-                                          length:
-                                            colCount
-                                        }).map(
-                                          (
-                                            _,
-                                            colIdx
-                                          ) => {
-
-                                            const value =
-                                              cells[
-                                                colIdx
-                                              ] ??
-                                              null;
-
-                                            if (
-                                              value ==
-                                              null
-                                            ) {
-                                              return (
-                                                <div
-                                                  key={`${row.key}-${rowIdx}-${colIdx}`}
-                                                  className="word-box-empty"
-                                                />
-                                              );
-                                            }
-
-                                            const isBlank =
-                                              blankCell.row ===
-                                                rowIdx &&
-                                              blankCell.col ===
-                                                colIdx;
-
-                                            return (
-                                              <div
-                                                key={`${row.key}-${rowIdx}-${colIdx}`}
-                                                className="word-box-cell"
-                                              >
-                                                {isBlank
-                                                  ? matchAnswers[
-                                                      activity
-                                                        .id
-                                                    ]?.[
-                                                      row.key
-                                                    ] ||
-                                                    value
-                                                  : value}
-                                              </div>
-                                            );
-                                          }
-                                        )
-                                    )}
-                                  </div>
-
-                                  <div className="choice-pool">
-                                    {row.options.map(
-                                      (option) => {
-
-                                        const selected =
-                                          matchAnswers[
-                                            activity.id
-                                          ]?.[
-                                            row.key
-                                          ] === option;
-
-                                        return (
-                                          <button
-                                            key={`${row.key}-${option}`}
-                                            type="button"
-                                            className={`number-option-btn ${
-                                              selected
-                                                ? "number-option-btn-selected"
-                                                : ""
-                                            }`}
-                                            onClick={() =>
-                                              setMatchAnswers(
-                                                (prev) => ({
-                                                  ...prev,
-                                                  [activity.id]:
-                                                    {
-                                                      ...(prev[
-                                                        activity.id
-                                                      ] ||
-                                                        {}),
-                                                      [row.key]:
-                                                        option
-                                                    }
-                                                })
-                                              )
-                                            }
-                                          >
-                                            {option}
-                                          </button>
-                                        );
-                                      }
-                                    )}
-                                  </div>
-
-                                  <p className="student-meta">
-                                    {row.optionHint ||
-                                      `(${row.options.join(
-                                        " / "
-                                      )})`}
-                                  </p>
-                                </div>
-                              );
-                            }
-                          )}
-                        </div>
-
-                      ) : activity.type === "match_letters" ? (
+                      ) : activity.type ===
+                        "match_letters" ? (
                         <div className="match-grid section-top">
 
                           <div className="choice-pool">
-                            {(activity.rightItems || []).map(
-                              (right) => {
+                            {(
+                              activity.rightItems ||
+                              []
+                            ).map((right) => {
+                              const selected =
+                                activeChoice[
+                                  activity.id
+                                ] === right;
 
-                                const selected =
-                                  activeChoice[
-                                    activity.id
-                                  ] === right;
-
-                                return (
-                                  <button
-                                    key={`pool-${right}`}
-                                    type="button"
-                                    className={`letter-choice ${
-                                      selected
-                                        ? "letter-choice-selected"
-                                        : ""
-                                    }`}
-                                    onClick={() =>
-                                      setActiveChoice(
-                                        (prev) => ({
-                                          ...prev,
-                                          [activity.id]:
-                                            selected
-                                              ? null
-                                              : right
-                                        })
-                                      )
-                                    }
-                                  >
-                                    {right}
-                                  </button>
-                                );
-                              }
-                            )}
-                          </div>
-
-                          <p className="student-meta">
-                            වචනයක් තෝරලා, ගැලපෙන වාක්‍ය කොටසට
-                            ටැප් කරන්න.
-                          </p>
-
-                          {(activity.leftItems || []).map(
-                            (left) => (
-                              <div
-                                key={left}
-                                className="match-row"
-                              >
-                                <span className="match-left">
-                                  {left}
-                                </span>
-
-                                <span className="match-arrow">
-                                  →
-                                </span>
-
+                              return (
                                 <button
+                                  key={`pool-${right}`}
                                   type="button"
-                                  className={`match-target ${
-                                    matchAnswers[
-                                      activity.id
-                                    ]?.[left]
-                                      ? "match-target-filled"
+                                  className={`letter-choice ${
+                                    selected
+                                      ? "letter-choice-selected"
                                       : ""
                                   }`}
                                   onClick={() =>
-                                    assignActiveChoice(
-                                      activity.id,
-                                      left
+                                    setActiveChoice(
+                                      (
+                                        prev
+                                      ) => ({
+                                        ...prev,
+                                        [activity.id]:
+                                          selected
+                                            ? null
+                                            : right
+                                      })
                                     )
                                   }
                                 >
-                                  {matchAnswers[
-                                    activity.id
-                                  ]?.[left] ||
-                                    "ගැලපෙන වචනය තෝරන්න"}
+                                  {right}
                                 </button>
-                              </div>
-                            )
-                          )}
-                        </div>
+                              );
+                            })}
+                          </div>
 
-                      ) : activity.type === "match_pictures" ? (
+                          <p className="student-meta">
+                            වචනයක් තෝරලා, ගැලපෙන වාක්‍ය කොටසට ටැප් කරන්න.
+                          </p>
+
+                          {(
+                            activity.leftItems ||
+                            []
+                          ).map((left) => (
+                            <div
+                              key={left}
+                              className="match-row"
+                            >
+                              <span className="match-left">
+                                {left}
+                              </span>
+
+                              <span className="match-arrow">
+                                →
+                              </span>
+
+                              <button
+                                type="button"
+                                className={`match-target ${
+                                  matchAnswers[
+                                    activity.id
+                                  ]?.[left]
+                                    ? "match-target-filled"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  assignActiveChoice(
+                                    activity.id,
+                                    left
+                                  )
+                                }
+                              >
+                                {matchAnswers[
+                                  activity.id
+                                ]?.[left] ||
+                                  "ගැලපෙන වචනය තෝරන්න"}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : activity.type ===
+                        "match_pictures" ? (
                         <div className="match-grid section-top">
 
-                          {(activity.leftItems || []).map(
-                            (left) => (
-                              <div
-                                key={left}
-                                className="match-row"
-                              >
-                                <span className="match-left">
-                                  {left}
-                                </span>
+                          {(
+                            activity.leftItems ||
+                            []
+                          ).map((left) => (
+                            <div
+                              key={left}
+                              className="match-row"
+                            >
+                              <span className="match-left">
+                                {left}
+                              </span>
 
-                                <span className="match-arrow">
-                                  →
-                                </span>
+                              <span className="match-arrow">
+                                →
+                              </span>
 
-                                <div className="letter-picture-options">
-                                  {(
-                                    activity.pictureOptions ||
-                                    []
-                                  ).map((pic) => {
+                              <div className="letter-picture-options">
+                                {(
+                                  activity.pictureOptions ||
+                                  []
+                                ).map((pic) => {
+                                  const selected =
+                                    matchAnswers[
+                                      activity.id
+                                    ]?.[left] ===
+                                    pic.label;
 
-                                    const selected =
-                                      matchAnswers[
-                                        activity.id
-                                      ]?.[left] ===
-                                      pic.label;
-
-                                    return (
-                                      <button
-                                        key={`${left}-${pic.label}`}
-                                        type="button"
-                                        className={`picture-choice ${
-                                          selected
-                                            ? "picture-choice-selected"
-                                            : ""
-                                        }`}
-                                        onClick={() =>
-                                          setMatchAnswers(
-                                            (prev) => ({
-                                              ...prev,
-                                              [activity.id]:
-                                                {
-                                                  ...(prev[
-                                                    activity
-                                                      .id
-                                                  ] || {}),
-                                                  [left]:
-                                                    pic.label
-                                                }
-                                            })
-                                          )
+                                  return (
+                                    <button
+                                      key={`${left}-${pic.label}`}
+                                      type="button"
+                                      className={`picture-choice ${
+                                        selected
+                                          ? "picture-choice-selected"
+                                          : ""
+                                      }`}
+                                      onClick={() =>
+                                        setMatchAnswers(
+                                          (
+                                            prev
+                                          ) => ({
+                                            ...prev,
+                                            [activity.id]:
+                                              {
+                                                ...(prev[
+                                                  activity
+                                                    .id
+                                                ] ||
+                                                  {}),
+                                                [left]:
+                                                  pic.label
+                                              }
+                                          })
+                                        )
+                                      }
+                                    >
+                                      <img
+                                        src={
+                                          pic.image
                                         }
-                                      >
-                                        <img
-                                          src={pic.image}
-                                          alt={pic.label}
-                                          className="picture-choice-thumb"
-                                        />
-                                      </button>
-                                    );
-                                  })}
-                                </div>
+                                        alt={
+                                          pic.label
+                                        }
+                                        className="picture-choice-thumb"
+                                      />
+                                    </button>
+                                  );
+                                })}
                               </div>
-                            )
-                          )}
+                            </div>
+                          ))}
                         </div>
-
-                      ) : activity.type === "arrange_words" ? (
+                      ) : activity.type ===
+                        "arrange_words" ? (
                         <div className="number-rows-grid section-top">
 
-                          {(activity.arrangeWordRows || []).map(
+                          {(
+                            activity.arrangeWordRows ||
+                            []
+                          ).map(
                             (row, index) => {
-
                               const builtWords =
                                 (
                                   matchAnswers[
                                     activity.id
-                                  ]?.[row.key] || ""
+                                  ]?.[
+                                    row.key
+                                  ] || ""
                                 )
                                   .split(
                                     WORD_SEPARATOR
                                   )
-                                  .filter(Boolean);
+                                  .filter(
+                                    Boolean
+                                  );
 
                               const builtSentence =
-                                builtWords.join(" ");
+                                builtWords.join(
+                                  " "
+                                );
 
                               return (
                                 <div
                                   key={row.key}
                                   className="word-box-row-card"
                                 >
-
                                   <div className="match-left">
                                     {index + 1}){" "}
                                     {row.words.join(
@@ -1057,18 +1236,22 @@ export default function Grade2SinhalaAptitudePage() {
                                   <button
                                     type="button"
                                     className={`match-target ${
-                                      builtWords.length > 0
+                                      builtWords.length >
+                                      0
                                         ? "match-target-filled"
                                         : ""
                                     }`}
                                     onClick={() =>
                                       setMatchAnswers(
-                                        (prev) => ({
+                                        (
+                                          prev
+                                        ) => ({
                                           ...prev,
                                           [activity.id]:
                                             {
                                               ...(prev[
-                                                activity.id
+                                                activity
+                                                  .id
                                               ] || {}),
                                               [row.key]:
                                                 ""
@@ -1084,7 +1267,6 @@ export default function Grade2SinhalaAptitudePage() {
                                   <div className="choice-pool">
                                     {row.words.map(
                                       (word) => {
-
                                         const alreadyPicked =
                                           builtWords.includes(
                                             word
@@ -1104,8 +1286,9 @@ export default function Grade2SinhalaAptitudePage() {
                                             }
                                             onClick={() =>
                                               setMatchAnswers(
-                                                (prev) => {
-
+                                                (
+                                                  prev
+                                                ) => {
                                                   const currentWords =
                                                     (
                                                       prev[
@@ -1114,7 +1297,8 @@ export default function Grade2SinhalaAptitudePage() {
                                                       ]?.[
                                                         row
                                                           .key
-                                                      ] || ""
+                                                      ] ||
+                                                      ""
                                                     )
                                                       .split(
                                                         WORD_SEPARATOR
@@ -1159,41 +1343,43 @@ export default function Grade2SinhalaAptitudePage() {
                             }
                           )}
                         </div>
-
-                      ) : activity.type === "mcq" ? (
+                      ) : activity.type ===
+                        "mcq" ? (
                         <div className="aptitude-options section-top">
 
-                          {(activity.options || []).map(
-                            (option) => (
-                              <label
-                                key={option}
-                                className="aptitude-option"
-                              >
-                                <input
-                                  type="radio"
-                                  name={`activity-${activity.id}`}
-                                  checked={
-                                    mcqAnswers[
-                                      activity.id
-                                    ] === option
-                                  }
-                                  onChange={() =>
-                                    setMcqAnswers(
-                                      (prev) => ({
-                                        ...prev,
-                                        [activity.id]:
-                                          option
-                                      })
-                                    )
-                                  }
-                                />
+                          {(
+                            activity.options ||
+                            []
+                          ).map((option) => (
+                            <label
+                              key={option}
+                              className="aptitude-option"
+                            >
+                              <input
+                                type="radio"
+                                name={`activity-${activity.id}`}
+                                checked={
+                                  mcqAnswers[
+                                    activity.id
+                                  ] ===
+                                  option
+                                }
+                                onChange={() =>
+                                  setMcqAnswers(
+                                    (prev) => ({
+                                      ...prev,
+                                      [activity.id]:
+                                        option
+                                    })
+                                  )
+                                }
+                              />
 
-                                <span>
-                                  {option}
-                                </span>
-                              </label>
-                            )
-                          )}
+                              <span>
+                                {option}
+                              </span>
+                            </label>
+                          ))}
                         </div>
                       ) : null}
                     </div>
