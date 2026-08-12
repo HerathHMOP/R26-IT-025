@@ -42,3 +42,34 @@ export async function completeExamSession(
   if (!res.ok) throw new Error("Failed to complete exam session");
   return res.json() as Promise<CompleteExamSessionResponse>;
 }
+
+export type LoginResponse = {
+  token: string;
+  user: Record<string, any>;
+};
+
+export async function loginAccount(email: string, password: string) {
+  const res = await fetch(`/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+
+  if (!res.ok) {
+    const payload = await res.json().catch(() => null);
+    const message = payload && payload.message ? payload.message : res.statusText || "Failed to login";
+    throw new Error(message);
+  }
+
+  return (await res.json()) as LoginResponse;
+}
+
+export function setSession(token: string, user: Record<string, any>) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem("token", token);
+    window.localStorage.setItem("user", JSON.stringify(user));
+  } catch (_e) {
+    // ignore storage errors in restricted environments
+  }
+}

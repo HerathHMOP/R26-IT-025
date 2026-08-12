@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   completeExamSession,
@@ -29,11 +29,19 @@ type ModeKey = "1s" | "2s" | "5s" | "10s";
 export default function Grade2MathsAptitudePage() {
   const params = useParams<{ studentId: string }>();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const studentId = useMemo(() => Number(params?.studentId), [params?.studentId]);
-  const selectedLanguage = searchParams.get("lang") === "sinhala" ? "sinhala" : "english";
+  const [selectedLanguage, setSelectedLanguage] = useState<"sinhala" | "english">("english");
   const uiLang: AptitudeUiLang = selectedLanguage === "sinhala" ? "sinhala" : "english";
   const activities = useMemo<Grade2MathsActivity[]>(() => getGrade2MathsActivities(selectedLanguage), [selectedLanguage]);
+
+  useEffect(() => {
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      setSelectedLanguage(sp.get("lang") === "sinhala" ? "sinhala" : "english");
+    } catch (_e) {
+      setSelectedLanguage("english");
+    }
+  }, []);
   const [studentName, setStudentName] = useState("Student");
   const [grade, setGrade] = useState<number | null>(null);
   const [subjectId, setSubjectId] = useState<number | null>(null);
