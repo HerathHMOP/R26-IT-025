@@ -73,3 +73,24 @@ export function setSession(token: string, user: Record<string, any>) {
     // ignore storage errors in restricted environments
   }
 }
+
+export async function registerAccount(payload: {
+  account_type: "parent" | "teacher";
+  full_name: string;
+  email: string;
+  password: string;
+}) {
+  const res = await fetch(`/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    const message = body && body.message ? body.message : res.statusText || "Failed to register";
+    throw new Error(message);
+  }
+
+  return (await res.json()) as LoginResponse;
+}
