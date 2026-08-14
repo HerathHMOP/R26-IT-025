@@ -7,9 +7,16 @@ import {
   getStoredUser,
   getStudentDashboard
 } from "@/lib/api";
+import {
+  grade3SinhalaActivities
+} from "@/lib/grade3SinhalaAptitude";
 
 export default function Grade3SinhalaAptitudePage() {
-  const params = useParams<{ studentId: string }>();
+  const WORD_SEPARATOR = " | ";
+
+  const params =
+    useParams<{ studentId: string }>();
+
   const router = useRouter();
 
   const studentId = useMemo(
@@ -25,6 +32,19 @@ export default function Grade3SinhalaAptitudePage() {
 
   const [subjectId, setSubjectId] =
     useState<number | null>(null);
+
+  const [matchAnswers, setMatchAnswers] =
+    useState<
+      Record<number, Record<string, string>>
+    >({});
+
+  const [activeChoice, setActiveChoice] =
+    useState<
+      Record<number, string | null>
+    >({});
+
+  const [currentActivityIndex, setCurrentActivityIndex] =
+    useState(0);
 
   const [error, setError] =
     useState<string | null>(null);
@@ -116,28 +136,17 @@ export default function Grade3SinhalaAptitudePage() {
             </p>
           ) : null}
 
-          {!error ? (
-            <>
-              <h2>Grade 3 Sinhala</h2>
+          {!error && grade === 3 ? (
+            <article className="dashboard-item subject-item">
 
-              <p>
-                Student profile loaded successfully.
+              <p className="student-meta">
+                Activity{" "}
+                {currentActivityIndex + 1}
+                {" "}of{" "}
+                {grade3SinhalaActivities.length}
               </p>
 
-              <p>
-                Subject ID:{" "}
-                {subjectId ?? "-"}
-              </p>
-
-              <div className="section-top">
-                <Link
-                  href={`/dashboard/students/${studentId}`}
-                  className="btn"
-                >
-                  Student Dashboard
-                </Link>
-              </div>
-            </>
+            </article>
           ) : null}
 
         </section>
