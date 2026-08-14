@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import {
+  getStoredUser,
+  getStudentDashboard
+} from "@/lib/api";
 
 export default function Grade3SinhalaAptitudePage() {
   const params = useParams<{ studentId: string }>();
@@ -24,6 +28,56 @@ export default function Grade3SinhalaAptitudePage() {
 
   const [error, setError] =
     useState<string | null>(null);
+
+  useEffect(() => {
+    const user = getStoredUser();
+
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
+
+    if (!studentId) {
+      setError("Invalid student profile.");
+      return;
+    }
+
+    async function loadStudent() {
+      try {
+        const dashboard =
+          await getStudentDashboard(studentId);
+
+        setStudentName(
+          dashboard.student.full_name
+        );
+
+        setGrade(
+          dashboard.student.grade
+        );
+
+        setSubjectId(
+          dashboard.subjects.find(
+            (subject) =>
+              subject.code === "sinhala"
+          )?.id ?? null
+        );
+
+        if (dashboard.student.grade !== 3) {
+          setError(
+            "This aptitude test is currently available only for Grade 3 students."
+          );
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load student profile"
+        );
+      }
+    }
+
+    loadStudent();
+  }, [router, studentId]);
 
   return (
     <main>
@@ -62,15 +116,29 @@ export default function Grade3SinhalaAptitudePage() {
             </p>
           ) : null}
 
-          <h2>Grade 3 Sinhala</h2>
+          {!error ? (
+            <>
+              <h2>Grade 3 Sinhala</h2>
 
-          <p>
-            Student profile will be loaded here.
-          </p>
+              <p>
+                Student profile loaded successfully.
+              </p>
 
-          <p>
-            Subject ID: {subjectId ?? "-"}
-          </p>
+              <p>
+                Subject ID:{" "}
+                {subjectId ?? "-"}
+              </p>
+
+              <div className="section-top">
+                <Link
+                  href={`/dashboard/students/${studentId}`}
+                  className="btn"
+                >
+                  Student Dashboard
+                </Link>
+              </div>
+            </>
+          ) : null}
 
         </section>
       </section>
