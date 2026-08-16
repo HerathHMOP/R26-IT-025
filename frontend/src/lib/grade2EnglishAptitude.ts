@@ -43,9 +43,23 @@ export type Grade2Activity =
       prompt: string;
       dragSortGroups: {
         title: string;
-        groups: Array<{ key: string; label: string }>;
+        groups: Array<{ key: string; label: string; image?: string }>;
         items: Array<{ key: string; image?: string; label: string; answerGroupKey: string }>;
       };
+    }
+  | {
+      id: number;
+      type: "select_images";
+      prompt: string;
+      image?: string;
+      selectImageRows: Array<{ key: string; image: string; label: string }>;
+      correctImageKeys: string[];
+    }
+  | {
+      id: number;
+      type: "image_rows";
+      prompt: string;
+      imageRows: Array<{ key: string; image: string; label: string; options: string[]; answer: string }>;
     };
 
 export const grade2EnglishAptitude = [];
