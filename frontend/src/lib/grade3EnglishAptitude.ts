@@ -195,13 +195,13 @@ export const grade3EnglishActivities: Grade2Activity[] = [
     id: 15,
     type: "match_letters",
     prompt: "Activity 15: Match each sentence with the correct reply",
-    leftItems: ["How are you?", "What's this?", "Good afternoon!", "This is my new shirt", "May I have a look?"],
+    leftItems: ["How are you?", "What's this?", "Good afternoon!", "This is my new", "May I have a look?"],
     rightItems: ["Good-bye!", "I am fine.", "It's a frock.", "Hello!", "Good afternoon!", "Good luck!", "It's nice.", "Thank you.", "Yes, you may.", "Let's go."],
     matchAnswerMap: {
       "How are you?": "I am fine.",
       "What's this?": "It's a frock.",
       "Good afternoon!": "Good afternoon!",
-      "This is my new shirt": "It's nice.",
+      "This is my new": "It's nice.",
       "May I have a look?": "Yes, you may."
     }
   }

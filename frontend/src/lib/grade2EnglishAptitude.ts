@@ -37,7 +37,13 @@ export type Grade2Activity = {
     | "match_image_pairs"
     | "match_shapes"
     | "circle_lowercase"
-    | "drag_sort_groups";
+    | "drag_sort_groups"
+    | "gift_bag_fill"
+    | "circle_odd_letter"
+    | "before_after_numbers"
+    | "pattern_next_rows"
+    | "map_label_drop"
+    | "dialogue_fill";
   options?: string[];
   answer?: string;
   leftItems?: string[];
@@ -284,12 +290,61 @@ export type Grade2Activity = {
   }[];
   dragSortGroups?: {
     title: string;
-    groups: { key: string; label: string }[];
+    groups: { key: string; label: string; image?: string }[];
     items: {
       key: string;
-      image: string;
+      image?: string;
       label: string;
       answerGroupKey: string;
+    }[];
+  };
+  giftBagFill?: {
+    referenceImage: string;
+    targetBagImage: string;
+    fixedItems: { key: string; image: string; label: string }[];
+    draggableItems: { key: string; image: string; label: string }[];
+    requiredKeys: string[];
+  };
+  circleOddLetterRows?: {
+    key: string;
+    color: "green" | "blue" | "peach" | "purple";
+    letters: string[];
+    answer: string;
+  }[];
+  beforeAfterRows?: {
+    key: string;
+    center: number;
+    beforeOptions: string[];
+    afterOptions: string[];
+    beforeAnswer: string;
+    afterAnswer: string;
+  }[];
+  patternNextRows?: {
+    key: string;
+    sequence: { key: string; image: string; label: string }[];
+    options: { key: string; image: string; label: string }[];
+    answer: string;
+  }[];
+  mapLabelDrop?: {
+    boardImage: string;
+    guideImage?: string;
+    boardAspectRatio?: number;
+    labels: { key: string; text: string }[];
+    zones: {
+      key: string;
+      box: { left: number; top: number; width: number; height: number };
+      /** Optional target point (in % of board) — draws a pointer line from the box to this spot. */
+      anchor?: { x: number; y: number };
+    }[];
+    answerMap: Record<string, string>;
+  };
+  dialogueFill?: {
+    choices: string[];
+    lines: {
+      speaker: string;
+      text?: string;
+      blankKey?: string;
+      answer?: string;
     }[];
   };
   wordOptions?: string[];
