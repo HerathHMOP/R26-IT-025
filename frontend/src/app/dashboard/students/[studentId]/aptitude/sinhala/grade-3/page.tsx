@@ -23,10 +23,15 @@ export default function Grade3SinhalaAptitudePage() {
   const [subjectId, setSubjectId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [mcqAnswers, setMcqAnswers] = useState<Record<number, string>>({});
-  const [completedActivities, setCompletedActivities] = useState<
-    Record<number, boolean>
-  >({});
+  const [mcqAnswers, setMcqAnswers] = useState<Record<number, string>>(
+    {}
+  );
+
+  const [completedActivities, setCompletedActivities] =
+    useState<Record<number, boolean>>({});
+
+  const [currentActivityIndex, setCurrentActivityIndex] =
+    useState(0);
 
   useEffect(() => {
     const user = getStoredUser();
@@ -91,9 +96,38 @@ export default function Grade3SinhalaAptitudePage() {
     setCompletedActivities(completed);
   }, [mcqAnswers]);
 
+  useEffect(() => {
+    const currentActivity =
+      grade3SinhalaActivities[currentActivityIndex];
+
+    if (!currentActivity) return;
+
+    if (!isActivityComplete(currentActivity)) return;
+
+    if (
+      currentActivityIndex >=
+      grade3SinhalaActivities.length - 1
+    ) {
+      return;
+    }
+
+    setCurrentActivityIndex((previous) =>
+      Math.min(
+        previous + 1,
+        grade3SinhalaActivities.length - 1
+      )
+    );
+  }, [
+    currentActivityIndex,
+    mcqAnswers,
+  ]);
+
   const completedCount = grade3SinhalaActivities.filter(
     (activity) => completedActivities[activity.id]
   ).length;
+
+  const currentActivity =
+    grade3SinhalaActivities[currentActivityIndex];
 
   return (
     <main>
@@ -132,67 +166,57 @@ export default function Grade3SinhalaAptitudePage() {
             <p className="error-text">{error}</p>
           ) : null}
 
-          {!error && grade === 3 ? (
+          {!error && grade === 3 && currentActivity ? (
             <article className="dashboard-item subject-item">
-              <h2>Grade 3 Sinhala Aptitude</h2>
+              <h2>
+                Activity {currentActivityIndex + 1} of{" "}
+                {grade3SinhalaActivities.length}
+              </h2>
 
               <p className="student-meta">
-                Completed activities: {completedCount}/
+                Completed: {completedCount}/
                 {grade3SinhalaActivities.length}
               </p>
 
-              <div className="students-grid section-top">
-                {grade3SinhalaActivities.map((activity, index) => (
-                  <div
-                    key={activity.id}
-                    className="dashboard-item"
-                  >
-                    <h3>
-                      Activity {index + 1}
-                    </h3>
+              <p className="section-top">
+                {currentActivity.prompt}
+              </p>
 
-                    <p>
-                      {activity.prompt}
-                    </p>
+              {currentActivity.type === "mcq" ? (
+                <div className="aptitude-options section-top">
+                  {(currentActivity.options || []).map(
+                    (option) => (
+                      <label
+                        key={option}
+                        className="aptitude-option"
+                      >
+                        <input
+                          type="radio"
+                          name={`activity-${currentActivity.id}`}
+                          checked={
+                            mcqAnswers[currentActivity.id] ===
+                            option
+                          }
+                          onChange={() =>
+                            setMcqAnswers((prev) => ({
+                              ...prev,
+                              [currentActivity.id]: option,
+                            }))
+                          }
+                        />
 
-                    {activity.type === "mcq" ? (
-                      <div className="aptitude-options section-top">
-                        {(activity.options || []).map(
-                          (option) => (
-                            <label
-                              key={option}
-                              className="aptitude-option"
-                            >
-                              <input
-                                type="radio"
-                                name={`activity-${activity.id}`}
-                                checked={
-                                  mcqAnswers[activity.id] ===
-                                  option
-                                }
-                                onChange={() =>
-                                  setMcqAnswers((prev) => ({
-                                    ...prev,
-                                    [activity.id]: option,
-                                  }))
-                                }
-                              />
+                        <span>{option}</span>
+                      </label>
+                    )
+                  )}
+                </div>
+              ) : null}
 
-                              <span>{option}</span>
-                            </label>
-                          )
-                        )}
-                      </div>
-                    ) : null}
-
-                    {completedActivities[activity.id] ? (
-                      <p className="student-meta section-top">
-                        ✓ Activity completed
-                      </p>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
+              {completedActivities[currentActivity.id] ? (
+                <p className="student-meta section-top">
+                  ✓ Activity completed
+                </p>
+              ) : null}
             </article>
           ) : null}
         </section>
