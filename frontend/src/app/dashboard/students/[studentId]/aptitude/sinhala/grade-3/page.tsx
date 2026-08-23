@@ -93,6 +93,7 @@ export default function Grade3SinhalaAptitudePage() {
 
     if (activity.type === "match_letters") {
       const selections = matchAnswers[activity.id] || {};
+
       return (
         Object.keys(selections).length ===
         (activity.leftItems || []).length
@@ -101,6 +102,7 @@ export default function Grade3SinhalaAptitudePage() {
 
     if (activity.type === "match_pictures") {
       const selections = matchAnswers[activity.id] || {};
+
       return (
         Object.keys(selections).length ===
         (activity.leftItems || []).length
@@ -174,27 +176,37 @@ export default function Grade3SinhalaAptitudePage() {
     (activity) => completedActivities[activity.id]
   ).length;
 
+  const totalActivities =
+    grade3SinhalaActivities.length;
+
   const currentActivity =
     grade3SinhalaActivities[currentActivityIndex];
 
+  const progress =
+    totalActivities > 0
+      ? Math.round(
+          (completedCount / totalActivities) * 100
+        )
+      : 0;
+
   return (
-    <main>
-      <header className="dashboard-topbar">
+    <main className="kid-aptitude-page">
+      <header className="dashboard-topbar kid-aptitude-topbar">
         <div>
-          <p className="dashboard-eyebrow">
+          <p className="dashboard-eyebrow kid-aptitude-eyebrow">
             Grade 3 Sinhala
           </p>
 
-          <h1 className="title dashboard-title">
+          <h1 className="title dashboard-title kid-aptitude-title">
             Grade 3 Sinhala Aptitude Test
           </h1>
 
-          <p className="subtitle">
-            Student : <strong>{studentName}</strong>
+          <p className="kid-aptitude-kicker">
+            Sinhala Aptitude Activities
           </p>
 
-          <p className="subtitle">
-            Grade : {grade ?? "-"}
+          <p className="subtitle kid-aptitude-subtitle">
+            Student : <strong>{studentName}</strong>
           </p>
         </div>
 
@@ -215,20 +227,48 @@ export default function Grade3SinhalaAptitudePage() {
           ) : null}
 
           {!error && grade === 3 && currentActivity ? (
-            <article className="dashboard-item subject-item">
-              <h2>
-                Activity {currentActivityIndex + 1} of{" "}
-                {grade3SinhalaActivities.length}
-              </h2>
+            <article className="dashboard-item subject-item kid-aptitude-card">
+              <div className="kid-aptitude-card-header">
+                <div>
+                  <h2 className="dashboard-panel-title">
+                    Activity {currentActivityIndex + 1}
+                  </h2>
 
-              <p className="student-meta">
-                Completed: {completedCount}/
-                {grade3SinhalaActivities.length}
-              </p>
+                  <p className="student-meta">
+                    Step {currentActivityIndex + 1} of{" "}
+                    {totalActivities}
+                  </p>
+                </div>
 
-              <p className="section-top">
-                {currentActivity.prompt}
-              </p>
+                <span
+                  className="kid-activity-badge"
+                  title="Current activity"
+                >
+                  ★ {currentActivityIndex + 1}
+                </span>
+              </div>
+
+              <div className="section-top">
+                <div className="kid-progress-track">
+                  <div
+                    className="kid-progress-fill"
+                    style={{
+                      width: `${progress}%`,
+                    }}
+                  />
+                </div>
+
+                <p className="student-meta kid-aptitude-answered-line">
+                  Completed {completedCount} of{" "}
+                  {totalActivities}
+                </p>
+              </div>
+
+              <div className="section-top">
+                <p className="student-meta aptitude-activity-prompt kid-aptitude-prompt">
+                  {currentActivity.prompt}
+                </p>
+              </div>
 
               {currentActivity.type === "mcq" ? (
                 <div className="aptitude-options section-top">
@@ -298,6 +338,11 @@ export default function Grade3SinhalaAptitudePage() {
                       }
                     )}
                   </div>
+
+                  <p className="student-meta">
+                    Select a word, then tap the matching
+                    item.
+                  </p>
 
                   {(currentActivity.leftItems || []).map(
                     (left) => (
