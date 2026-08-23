@@ -27,6 +27,14 @@ export default function Grade3SinhalaAptitudePage() {
     {}
   );
 
+  const [matchAnswers, setMatchAnswers] = useState<
+    Record<number, Record<string, string>>
+  >({});
+
+  const [activeChoice, setActiveChoice] = useState<
+    Record<number, string | null>
+  >({});
+
   const [completedActivities, setCompletedActivities] =
     useState<Record<number, boolean>>({});
 
@@ -83,6 +91,22 @@ export default function Grade3SinhalaAptitudePage() {
       return Boolean(mcqAnswers[activity.id]);
     }
 
+    if (activity.type === "match_letters") {
+      const selections = matchAnswers[activity.id] || {};
+      return (
+        Object.keys(selections).length ===
+        (activity.leftItems || []).length
+      );
+    }
+
+    if (activity.type === "match_pictures") {
+      const selections = matchAnswers[activity.id] || {};
+      return (
+        Object.keys(selections).length ===
+        (activity.leftItems || []).length
+      );
+    }
+
     return false;
   }
 
@@ -90,11 +114,12 @@ export default function Grade3SinhalaAptitudePage() {
     const completed: Record<number, boolean> = {};
 
     grade3SinhalaActivities.forEach((activity) => {
-      completed[activity.id] = isActivityComplete(activity);
+      completed[activity.id] =
+        isActivityComplete(activity);
     });
 
     setCompletedActivities(completed);
-  }, [mcqAnswers]);
+  }, [mcqAnswers, matchAnswers]);
 
   useEffect(() => {
     const currentActivity =
@@ -120,7 +145,30 @@ export default function Grade3SinhalaAptitudePage() {
   }, [
     currentActivityIndex,
     mcqAnswers,
+    matchAnswers,
   ]);
+
+  function assignActiveChoice(
+    activityId: number,
+    key: string
+  ) {
+    const currentChoice = activeChoice[activityId];
+
+    if (!currentChoice) return;
+
+    setMatchAnswers((previous) => ({
+      ...previous,
+      [activityId]: {
+        ...(previous[activityId] || {}),
+        [key]: currentChoice,
+      },
+    }));
+
+    setActiveChoice((previous) => ({
+      ...previous,
+      [activityId]: null,
+    }));
+  }
 
   const completedCount = grade3SinhalaActivities.filter(
     (activity) => completedActivities[activity.id]
@@ -198,9 +246,10 @@ export default function Grade3SinhalaAptitudePage() {
                             option
                           }
                           onChange={() =>
-                            setMcqAnswers((prev) => ({
-                              ...prev,
-                              [currentActivity.id]: option,
+                            setMcqAnswers((previous) => ({
+                              ...previous,
+                              [currentActivity.id]:
+                                option,
                             }))
                           }
                         />
@@ -212,7 +261,157 @@ export default function Grade3SinhalaAptitudePage() {
                 </div>
               ) : null}
 
-              {completedActivities[currentActivity.id] ? (
+              {currentActivity.type === "match_letters" ? (
+                <div className="match-grid section-top">
+                  <div className="choice-pool">
+                    {(currentActivity.rightItems || []).map(
+                      (right) => {
+                        const selected =
+                          activeChoice[
+                            currentActivity.id
+                          ] === right;
+
+                        return (
+                          <button
+                            key={right}
+                            type="button"
+                            className={`letter-choice ${
+                              selected
+                                ? "letter-choice-selected"
+                                : ""
+                            }`}
+                            onClick={() =>
+                              setActiveChoice(
+                                (previous) => ({
+                                  ...previous,
+                                  [currentActivity.id]:
+                                    selected
+                                      ? null
+                                      : right,
+                                })
+                              )
+                            }
+                          >
+                            {right}
+                          </button>
+                        );
+                      }
+                    )}
+                  </div>
+
+                  {(currentActivity.leftItems || []).map(
+                    (left) => (
+                      <div
+                        key={left}
+                        className="match-row"
+                      >
+                        <span className="match-left">
+                          {left}
+                        </span>
+
+                        <span className="match-arrow">
+                          →
+                        </span>
+
+                        <button
+                          type="button"
+                          className={`match-target ${
+                            matchAnswers[
+                              currentActivity.id
+                            ]?.[left]
+                              ? "match-target-filled"
+                              : ""
+                          }`}
+                          onClick={() =>
+                            assignActiveChoice(
+                              currentActivity.id,
+                              left
+                            )
+                          }
+                        >
+                          {matchAnswers[
+                            currentActivity.id
+                          ]?.[left] ||
+                            "Select matching word"}
+                        </button>
+                      </div>
+                    )
+                  )}
+                </div>
+              ) : null}
+
+              {currentActivity.type ===
+              "match_pictures" ? (
+                <div className="match-grid section-top">
+                  {(currentActivity.leftItems || []).map(
+                    (left) => (
+                      <div
+                        key={left}
+                        className="match-row"
+                      >
+                        <span className="match-left">
+                          {left}
+                        </span>
+
+                        <span className="match-arrow">
+                          →
+                        </span>
+
+                        <div className="letter-picture-options">
+                          {(
+                            currentActivity.pictureOptions ||
+                            []
+                          ).map((picture) => {
+                            const selected =
+                              matchAnswers[
+                                currentActivity.id
+                              ]?.[left] ===
+                              picture.label;
+
+                            return (
+                              <button
+                                key={`${left}-${picture.label}`}
+                                type="button"
+                                className={`picture-choice ${
+                                  selected
+                                    ? "picture-choice-selected"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  setMatchAnswers(
+                                    (previous) => ({
+                                      ...previous,
+                                      [currentActivity.id]:
+                                        {
+                                          ...(previous[
+                                            currentActivity
+                                              .id
+                                          ] || {}),
+                                          [left]:
+                                            picture.label,
+                                        },
+                                    })
+                                  )
+                                }
+                              >
+                                <img
+                                  src={picture.image}
+                                  alt={picture.label}
+                                  className="picture-choice-thumb"
+                                />
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              ) : null}
+
+              {completedActivities[
+                currentActivity.id
+              ] ? (
                 <p className="student-meta section-top">
                   ✓ Activity completed
                 </p>
