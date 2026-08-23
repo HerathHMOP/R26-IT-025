@@ -4,8 +4,11 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
+  completeExamSession,
   getStoredUser,
-  getStudentDashboard
+  getStudentDashboard,
+  startExamSession,
+  type CompleteExamSessionResponse
 } from "@/lib/api";
 import { grade3SinhalaActivities } from "@/lib/grade3SinhalaAptitude";
 
@@ -42,8 +45,16 @@ export default function Grade3SinhalaAptitudePage() {
   const [currentActivityIndex, setCurrentActivityIndex] =
     useState(0);
 
+  const [submitting, setSubmitting] =
+    useState(false);
+
   const [error, setError] =
     useState<string | null>(null);
+
+  const [result, setResult] =
+    useState<CompleteExamSessionResponse | null>(
+      null
+    );
 
   useEffect(() => {
     const user = getStoredUser();
@@ -159,10 +170,48 @@ export default function Grade3SinhalaAptitudePage() {
     return 0;
   }
 
-  const currentActivity =
-    grade3SinhalaActivities[
-      currentActivityIndex
-    ];
+  async function handleSubmit() {
+    if (!studentId || grade !== 3) {
+      return;
+    }
+
+    setError(null);
+    setSubmitting(true);
+
+    try {
+      const correctAnswers =
+        grade3SinhalaActivities.reduce(
+          (count, activity) =>
+            count +
+            getActivityMark(activity),
+          0
+        );
+
+      const session =
+        await startExamSession(
+          studentId,
+          grade3SinhalaActivities.length
+        );
+
+      const finalResult =
+        await completeExamSession(
+          session.exam_session_id,
+          correctAnswers,
+          subjectId ?? undefined,
+          grade3SinhalaActivities.length
+        );
+
+      setResult(finalResult);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to submit aptitude test"
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <main>
@@ -201,76 +250,44 @@ export default function Grade3SinhalaAptitudePage() {
             </p>
           ) : null}
 
-          {!error &&
-          grade === 3 &&
-          currentActivity ? (
-            <article className="dashboard-item subject-item">
-
-              <p className="student-meta">
-                Activity{" "}
-                {currentActivityIndex + 1}
-                {" "}of{" "}
-                {grade3SinhalaActivities.length}
-              </p>
-
+          {result ? (
+            <section className="dashboard-item">
               <h2>
-                {currentActivity.prompt}
+                Aptitude Test Complete
               </h2>
 
-              {currentActivity.type ===
-              "text_rows" ? (
-                <div className="number-rows-grid section-top">
-                  {(
-                    currentActivity.textRows ||
-                    []
-                  ).map((row) => (
-                    <div
-                      key={row.key}
-                      className="number-row-card"
-                    >
-                      <div className="match-left">
-                        {row.prompt}
-                      </div>
+              <p>
+                Score:{" "}
+                {result.correct_answers}/
+                {result.total_activities}
+                {" "}
+                ({result.score_percent}%)
+              </p>
+            </section>
+          ) : null}
 
-                      <div className="choice-pool">
-                        {row.options.map(
-                          (option) => (
-                            <button
-                              key={`${row.key}-${option}`}
-                              type="button"
-                              className={`number-option-btn ${
-                                matchAnswers[
-                                  currentActivity.id
-                                ]?.[row.key] ===
-                                option
-                                  ? "number-option-btn-selected"
-                                  : ""
-                              }`}
-                              onClick={() =>
-                                setMatchAnswers(
-                                  (prev) => ({
-                                    ...prev,
-                                    [currentActivity.id]:
-                                      {
-                                        ...(prev[
-                                          currentActivity.id
-                                        ] || {}),
-                                        [row.key]:
-                                          option
-                                      }
-                                  })
-                                )
-                              }
-                            >
-                              {option}
-                            </button>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
+          {!result && grade === 3 ? (
+            <article className="dashboard-item">
+
+              <h2>
+                Grade 3 Sinhala
+              </h2>
+
+              <p>
+                Complete all activities
+                before submitting.
+              </p>
+
+              <button
+                type="button"
+                className="btn"
+                onClick={handleSubmit}
+                disabled={submitting}
+              >
+                {submitting
+                  ? "Submitting..."
+                  : "Submit Aptitude Test"}
+              </button>
 
             </article>
           ) : null}
