@@ -7,16 +7,12 @@ import {
   getStoredUser,
   getStudentDashboard
 } from "@/lib/api";
-import {
-  grade3SinhalaActivities
-} from "@/lib/grade3SinhalaAptitude";
+import { grade3SinhalaActivities } from "@/lib/grade3SinhalaAptitude";
 
 export default function Grade3SinhalaAptitudePage() {
   const WORD_SEPARATOR = " | ";
 
-  const params =
-    useParams<{ studentId: string }>();
-
+  const params = useParams<{ studentId: string }>();
   const router = useRouter();
 
   const studentId = useMemo(
@@ -99,6 +95,75 @@ export default function Grade3SinhalaAptitudePage() {
     loadStudent();
   }, [router, studentId]);
 
+  function getActivityMark(
+    activity:
+      (typeof grade3SinhalaActivities)[number]
+  ): 0 | 1 {
+    if (activity.type === "text_rows") {
+      const selectedMap =
+        matchAnswers[activity.id] || {};
+
+      const allRowsCorrect =
+        (activity.textRows || []).length > 0 &&
+        (activity.textRows || []).every(
+          (row) =>
+            selectedMap[row.key] ===
+            row.answer
+        );
+
+      return allRowsCorrect ? 1 : 0;
+    }
+
+    if (activity.type === "match_letters") {
+      const selectedMap =
+        matchAnswers[activity.id] || {};
+
+      const expectedMap =
+        activity.matchAnswerMap || {};
+
+      const allMatched =
+        Object.keys(expectedMap).length > 0 &&
+        Object.entries(expectedMap).every(
+          ([left, right]) =>
+            selectedMap[left] === right
+        );
+
+      return allMatched ? 1 : 0;
+    }
+
+    if (activity.type === "arrange_words") {
+      const selectedMap =
+        matchAnswers[activity.id] || {};
+
+      const allRowsCorrect =
+        (activity.arrangeWordRows || []).length >
+          0 &&
+        (activity.arrangeWordRows || []).every(
+          (row) => {
+            const builtWords = (
+              selectedMap[row.key] || ""
+            )
+              .split(WORD_SEPARATOR)
+              .filter(Boolean);
+
+            return (
+              builtWords.join(" ") ===
+              row.answer
+            );
+          }
+        );
+
+      return allRowsCorrect ? 1 : 0;
+    }
+
+    return 0;
+  }
+
+  const currentActivity =
+    grade3SinhalaActivities[
+      currentActivityIndex
+    ];
+
   return (
     <main>
       <header className="dashboard-topbar">
@@ -136,7 +201,9 @@ export default function Grade3SinhalaAptitudePage() {
             </p>
           ) : null}
 
-          {!error && grade === 3 ? (
+          {!error &&
+          grade === 3 &&
+          currentActivity ? (
             <article className="dashboard-item subject-item">
 
               <p className="student-meta">
@@ -145,6 +212,65 @@ export default function Grade3SinhalaAptitudePage() {
                 {" "}of{" "}
                 {grade3SinhalaActivities.length}
               </p>
+
+              <h2>
+                {currentActivity.prompt}
+              </h2>
+
+              {currentActivity.type ===
+              "text_rows" ? (
+                <div className="number-rows-grid section-top">
+                  {(
+                    currentActivity.textRows ||
+                    []
+                  ).map((row) => (
+                    <div
+                      key={row.key}
+                      className="number-row-card"
+                    >
+                      <div className="match-left">
+                        {row.prompt}
+                      </div>
+
+                      <div className="choice-pool">
+                        {row.options.map(
+                          (option) => (
+                            <button
+                              key={`${row.key}-${option}`}
+                              type="button"
+                              className={`number-option-btn ${
+                                matchAnswers[
+                                  currentActivity.id
+                                ]?.[row.key] ===
+                                option
+                                  ? "number-option-btn-selected"
+                                  : ""
+                              }`}
+                              onClick={() =>
+                                setMatchAnswers(
+                                  (prev) => ({
+                                    ...prev,
+                                    [currentActivity.id]:
+                                      {
+                                        ...(prev[
+                                          currentActivity.id
+                                        ] || {}),
+                                        [row.key]:
+                                          option
+                                      }
+                                  })
+                                )
+                              }
+                            >
+                              {option}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
 
             </article>
           ) : null}
