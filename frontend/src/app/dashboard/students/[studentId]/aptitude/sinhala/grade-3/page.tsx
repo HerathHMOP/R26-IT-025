@@ -1,20 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
-  completeExamSession,
   getStoredUser,
   getStudentDashboard,
-  startExamSession,
-  type CompleteExamSessionResponse
 } from "@/lib/api";
 import { grade3SinhalaActivities } from "@/lib/grade3SinhalaAptitude";
 
 export default function Grade3SinhalaAptitudePage() {
-  const WORD_SEPARATOR = " | ";
-
   const params = useParams<{ studentId: string }>();
   const router = useRouter();
 
@@ -23,38 +18,15 @@ export default function Grade3SinhalaAptitudePage() {
     [params?.studentId]
   );
 
-  const [studentName, setStudentName] =
-    useState("Student");
+  const [studentName, setStudentName] = useState("Student");
+  const [grade, setGrade] = useState<number | null>(null);
+  const [subjectId, setSubjectId] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const [grade, setGrade] =
-    useState<number | null>(null);
-
-  const [subjectId, setSubjectId] =
-    useState<number | null>(null);
-
-  const [matchAnswers, setMatchAnswers] =
-    useState<
-      Record<number, Record<string, string>>
-    >({});
-
-  const [activeChoice, setActiveChoice] =
-    useState<
-      Record<number, string | null>
-    >({});
-
-  const [currentActivityIndex, setCurrentActivityIndex] =
-    useState(0);
-
-  const [submitting, setSubmitting] =
-    useState(false);
-
-  const [error, setError] =
-    useState<string | null>(null);
-
-  const [result, setResult] =
-    useState<CompleteExamSessionResponse | null>(
-      null
-    );
+  const [mcqAnswers, setMcqAnswers] = useState<Record<number, string>>({});
+  const [completedActivities, setCompletedActivities] = useState<
+    Record<number, boolean>
+  >({});
 
   useEffect(() => {
     const user = getStoredUser();
@@ -71,21 +43,14 @@ export default function Grade3SinhalaAptitudePage() {
 
     async function loadStudent() {
       try {
-        const dashboard =
-          await getStudentDashboard(studentId);
+        const dashboard = await getStudentDashboard(studentId);
 
-        setStudentName(
-          dashboard.student.full_name
-        );
-
-        setGrade(
-          dashboard.student.grade
-        );
+        setStudentName(dashboard.student.full_name);
+        setGrade(dashboard.student.grade);
 
         setSubjectId(
           dashboard.subjects.find(
-            (subject) =>
-              subject.code === "sinhala"
+            (subject) => subject.code === "sinhala"
           )?.id ?? null
         );
 
@@ -106,128 +71,48 @@ export default function Grade3SinhalaAptitudePage() {
     loadStudent();
   }, [router, studentId]);
 
-  function getActivityMark(
-    activity:
-      (typeof grade3SinhalaActivities)[number]
-  ): 0 | 1 {
-    if (activity.type === "text_rows") {
-      const selectedMap =
-        matchAnswers[activity.id] || {};
-
-      const allRowsCorrect =
-        (activity.textRows || []).length > 0 &&
-        (activity.textRows || []).every(
-          (row) =>
-            selectedMap[row.key] ===
-            row.answer
-        );
-
-      return allRowsCorrect ? 1 : 0;
+  function isActivityComplete(
+    activity: (typeof grade3SinhalaActivities)[number]
+  ) {
+    if (activity.type === "mcq") {
+      return Boolean(mcqAnswers[activity.id]);
     }
 
-    if (activity.type === "match_letters") {
-      const selectedMap =
-        matchAnswers[activity.id] || {};
-
-      const expectedMap =
-        activity.matchAnswerMap || {};
-
-      const allMatched =
-        Object.keys(expectedMap).length > 0 &&
-        Object.entries(expectedMap).every(
-          ([left, right]) =>
-            selectedMap[left] === right
-        );
-
-      return allMatched ? 1 : 0;
-    }
-
-    if (activity.type === "arrange_words") {
-      const selectedMap =
-        matchAnswers[activity.id] || {};
-
-      const allRowsCorrect =
-        (activity.arrangeWordRows || []).length >
-          0 &&
-        (activity.arrangeWordRows || []).every(
-          (row) => {
-            const builtWords = (
-              selectedMap[row.key] || ""
-            )
-              .split(WORD_SEPARATOR)
-              .filter(Boolean);
-
-            return (
-              builtWords.join(" ") ===
-              row.answer
-            );
-          }
-        );
-
-      return allRowsCorrect ? 1 : 0;
-    }
-
-    return 0;
+    return false;
   }
 
-  async function handleSubmit() {
-    if (!studentId || grade !== 3) {
-      return;
-    }
+  useEffect(() => {
+    const completed: Record<number, boolean> = {};
 
-    setError(null);
-    setSubmitting(true);
+    grade3SinhalaActivities.forEach((activity) => {
+      completed[activity.id] = isActivityComplete(activity);
+    });
 
-    try {
-      const correctAnswers =
-        grade3SinhalaActivities.reduce(
-          (count, activity) =>
-            count +
-            getActivityMark(activity),
-          0
-        );
+    setCompletedActivities(completed);
+  }, [mcqAnswers]);
 
-      const session =
-        await startExamSession(
-          studentId,
-          grade3SinhalaActivities.length
-        );
-
-      const finalResult =
-        await completeExamSession(
-          session.exam_session_id,
-          correctAnswers,
-          subjectId ?? undefined,
-          grade3SinhalaActivities.length
-        );
-
-      setResult(finalResult);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to submit aptitude test"
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  const completedCount = grade3SinhalaActivities.filter(
+    (activity) => completedActivities[activity.id]
+  ).length;
 
   return (
     <main>
       <header className="dashboard-topbar">
         <div>
-          <h1>
+          <p className="dashboard-eyebrow">
+            Grade 3 Sinhala
+          </p>
+
+          <h1 className="title dashboard-title">
             Grade 3 Sinhala Aptitude Test
           </h1>
 
           <p className="subtitle">
-            Student:{" "}
-            <strong>{studentName}</strong>
+            Student : <strong>{studentName}</strong>
           </p>
 
           <p className="subtitle">
-            Grade: {grade ?? "-"}
+            Grade : {grade ?? "-"}
           </p>
         </div>
 
@@ -243,55 +128,73 @@ export default function Grade3SinhalaAptitudePage() {
 
       <section className="dashboard-content dashboard-content-single">
         <section className="dashboard-panel dashboard-main-panel">
-
           {error ? (
-            <p className="error-text">
-              {error}
-            </p>
+            <p className="error-text">{error}</p>
           ) : null}
 
-          {result ? (
-            <section className="dashboard-item">
-              <h2>
-                Aptitude Test Complete
-              </h2>
+          {!error && grade === 3 ? (
+            <article className="dashboard-item subject-item">
+              <h2>Grade 3 Sinhala Aptitude</h2>
 
-              <p>
-                Score:{" "}
-                {result.correct_answers}/
-                {result.total_activities}
-                {" "}
-                ({result.score_percent}%)
-              </p>
-            </section>
-          ) : null}
-
-          {!result && grade === 3 ? (
-            <article className="dashboard-item">
-
-              <h2>
-                Grade 3 Sinhala
-              </h2>
-
-              <p>
-                Complete all activities
-                before submitting.
+              <p className="student-meta">
+                Completed activities: {completedCount}/
+                {grade3SinhalaActivities.length}
               </p>
 
-              <button
-                type="button"
-                className="btn"
-                onClick={handleSubmit}
-                disabled={submitting}
-              >
-                {submitting
-                  ? "Submitting..."
-                  : "Submit Aptitude Test"}
-              </button>
+              <div className="students-grid section-top">
+                {grade3SinhalaActivities.map((activity, index) => (
+                  <div
+                    key={activity.id}
+                    className="dashboard-item"
+                  >
+                    <h3>
+                      Activity {index + 1}
+                    </h3>
 
+                    <p>
+                      {activity.prompt}
+                    </p>
+
+                    {activity.type === "mcq" ? (
+                      <div className="aptitude-options section-top">
+                        {(activity.options || []).map(
+                          (option) => (
+                            <label
+                              key={option}
+                              className="aptitude-option"
+                            >
+                              <input
+                                type="radio"
+                                name={`activity-${activity.id}`}
+                                checked={
+                                  mcqAnswers[activity.id] ===
+                                  option
+                                }
+                                onChange={() =>
+                                  setMcqAnswers((prev) => ({
+                                    ...prev,
+                                    [activity.id]: option,
+                                  }))
+                                }
+                              />
+
+                              <span>{option}</span>
+                            </label>
+                          )
+                        )}
+                      </div>
+                    ) : null}
+
+                    {completedActivities[activity.id] ? (
+                      <p className="student-meta section-top">
+                        ✓ Activity completed
+                      </p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
             </article>
           ) : null}
-
         </section>
       </section>
     </main>
