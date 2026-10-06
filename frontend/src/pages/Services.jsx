@@ -8,14 +8,6 @@ import {
   Sparkles, 
   ArrowRight, 
   CheckCircle2, 
-  Brain, 
-  Eye, 
-  TrendingUp, 
-  Compass, 
-  Award,
-  Layers,
-  Activity,
-  BookOpen
 } from 'lucide-react';
 import { getItem } from '../utils/storage';
 

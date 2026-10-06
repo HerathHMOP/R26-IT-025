@@ -26,7 +26,7 @@ export function getActiveStudentKey() {
                 (typeof localStorage !== 'undefined' && localStorage.getItem('studentId')) || '';
     const cleaned = (sName || sId || 'default').toLowerCase().trim().replace(/[^a-z0-9_]/g, '_');
     return cleaned || 'default';
-  } catch (e) {
+  } catch {
     return 'default';
   }
 }
@@ -60,7 +60,7 @@ export class Grade2AdaptiveEngine {
             this.session = parsed;
             this.saveSession(parsed);
             return parsed;
-          } catch (e) {}
+          } catch {}
         }
       }
     } catch (e) {

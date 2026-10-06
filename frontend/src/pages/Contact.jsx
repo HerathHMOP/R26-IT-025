@@ -8,11 +8,9 @@ import {
   CheckCircle2, 
   Sparkles, 
   User, 
-  MessageSquare, 
   HelpCircle, 
   Building2, 
   ArrowRight, 
-  ExternalLink,
   ShieldCheck,
   RotateCcw
 } from 'lucide-react';

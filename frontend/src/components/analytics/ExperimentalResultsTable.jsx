@@ -1,27 +1,18 @@
 import React, { useState } from 'react';
 import { 
-  Sparkles, 
-  CheckCircle2, 
   HelpCircle, 
-  FileSpreadsheet, 
   Download, 
   Calculator, 
-  Languages, 
-  Mic, 
-  Palette,
-  TrendingUp,
   Cpu,
-  BarChart3,
   Layers,
   ChevronDown,
   ChevronUp,
-  Award,
   Database,
   BrainCircuit,
   Grid
 } from 'lucide-react';
 
-export const AI_EXPERIMENTAL_RESULTS = [
+const AI_EXPERIMENTAL_RESULTS = [
   {
     id: 'math',
     module: 'ගණිතය (Mathematics)',
@@ -169,7 +160,7 @@ export const AI_EXPERIMENTAL_RESULTS = [
 ];
 
 export default function ExperimentalResultsTable() {
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab] = useState('all');
   const [showFormulas, setShowFormulas] = useState(false);
   const [expandedRows, setExpandedRows] = useState({
     math: true,
@@ -177,7 +168,6 @@ export default function ExperimentalResultsTable() {
     english: true,
     preschool: true
   });
-  const [selectedModuleModal, setSelectedModuleModal] = useState(null);
 
   // Overall System Macro Averages
   const overallAvgAccuracy = (AI_EXPERIMENTAL_RESULTS.reduce((a, b) => a + b.accuracyVal, 0) / AI_EXPERIMENTAL_RESULTS.length).toFixed(2);
@@ -407,7 +397,7 @@ export default function ExperimentalResultsTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/80 font-semibold text-slate-800">
-            {filteredResults.map((item, idx) => {
+            {filteredResults.map((item) => {
               const isExpanded = expandedRows[item.id];
 
               return (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Target, Users, Sparkles, Heart, Award, ArrowRight } from 'lucide-react';
+import { BookOpen, Target, Users, Sparkles, Heart, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const About = () => {

@@ -10,8 +10,6 @@ import {
   LogIn, 
   LogOut,
   LayoutDashboard,
-  User,
-  Sparkles
 } from 'lucide-react';
 import { getItem, clearSession } from '../../utils/storage';
 

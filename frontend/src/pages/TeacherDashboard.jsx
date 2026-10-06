@@ -4,14 +4,7 @@ import {
   Users, 
   GraduationCap, 
   BarChart3, 
-  TrendingUp, 
   Sparkles, 
-  Download, 
-  CheckCircle2, 
-  BookOpen, 
-  Compass, 
-  ArrowRight, 
-  Database, 
   Calculator, 
   Languages, 
   Mic, 
@@ -20,12 +13,12 @@ import {
   LogOut, 
   ChevronRight, 
   Award, 
-  Layers, 
   ExternalLink 
 } from 'lucide-react';
-import CategoryStudentTable, { isPreSchoolOrGrade1 } from '../components/analytics/CategoryStudentTable';
+import CategoryStudentTable from '../components/analytics/CategoryStudentTable';
+import { isPreSchoolOrGrade1 } from '../utils/studentGrade';
 import ExperimentalResultsTable from '../components/analytics/ExperimentalResultsTable';
-import { fetchStudentsAnalyticsFromApi, CORE_SUBJECTS } from '../data/studentAnalyticsData';
+import { fetchStudentsAnalyticsFromApi } from '../data/studentAnalyticsData';
 import { getItem, clearSession } from '../utils/storage';
 
 const TeacherDashboard = () => {
@@ -42,7 +35,7 @@ const TeacherDashboard = () => {
       if (fromStorage && ['overview', 'math', 'sinhala', 'english', 'preschool', 'evaluation'].includes(fromStorage)) {
         return fromStorage;
       }
-    } catch (e) {}
+    } catch {}
     return 'overview';
   };
 
@@ -56,7 +49,7 @@ const TeacherDashboard = () => {
     setSearchParams({ tab: newTab });
     try {
       localStorage.setItem('teacher_dashboard_tab', newTab);
-    } catch (e) {}
+    } catch {}
   };
 
   useEffect(() => {
@@ -65,9 +58,9 @@ const TeacherDashboard = () => {
       setActiveTabState(fromUrl);
       try {
         localStorage.setItem('teacher_dashboard_tab', fromUrl);
-      } catch (e) {}
+      } catch {}
     }
-  }, [searchParams]);
+  }, [searchParams, activeTab]);
 
   useEffect(() => {
     const token = getItem('token');
@@ -97,9 +90,6 @@ const TeacherDashboard = () => {
     navigate('/login');
   };
 
-  const classAverage = students.length > 0 
-    ? Math.round(students.reduce((acc, s) => acc + (s.overallAverage || 0), 0) / students.length) 
-    : 0;
   const totalExercisesClass = students.reduce((acc, s) => acc + (s.totalExercises || 0), 0);
 
   // Category enrollment counts

@@ -13,7 +13,7 @@ export function stopSinhalaAudio() {
     try {
       activeSinhalaAudio.pause();
       activeSinhalaAudio.src = '';
-    } catch (e) {}
+    } catch {}
     activeSinhalaAudio = null;
   }
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -51,7 +51,7 @@ function playAudioPromise(rawText) {
       try {
         activeSinhalaAudio.pause();
         activeSinhalaAudio.src = '';
-      } catch (e) {}
+      } catch {}
       activeSinhalaAudio = null;
     }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {

@@ -2,16 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   BarChart3, 
-  Sparkles, 
   BookOpen, 
-  ArrowRight, 
-  TrendingUp, 
-  Award, 
-  Brain, 
-  Layers, 
-  ChevronRight, 
-  Lock, 
-  AlertCircle 
+  Lock
 } from 'lucide-react';
 import StudentAnalyticsOverview from '../components/analytics/StudentAnalyticsOverview';
 import { fetchStudentAnalyticsFromApi } from '../data/studentAnalyticsData';
@@ -33,7 +25,7 @@ const Dashboard = () => {
     try {
       const fromStorage = localStorage.getItem('student_dashboard_view');
       if (fromStorage && ['modules', 'analytics'].includes(fromStorage)) return fromStorage;
-    } catch (e) {}
+    } catch {}
     return 'modules';
   };
 
@@ -49,7 +41,7 @@ const Dashboard = () => {
     setSearchParams({ view: newView });
     try {
       localStorage.setItem('student_dashboard_view', newView);
-    } catch (e) {}
+    } catch {}
   };
 
   useEffect(() => {
@@ -58,7 +50,7 @@ const Dashboard = () => {
       setActiveViewState(fromUrl);
       try {
         localStorage.setItem('student_dashboard_view', fromUrl);
-      } catch (e) {}
+      } catch {}
     }
     const hub = searchParams.get('hub');
     if (hub === 'sinhala') {
@@ -74,7 +66,7 @@ const Dashboard = () => {
       setShowSinhalaHubs(false);
       setShowMathHubs(false);
     }
-  }, [searchParams]);
+  }, [searchParams, activeView]);
 
   useEffect(() => {
     const token = getItem('token');
@@ -97,7 +89,7 @@ const Dashboard = () => {
     if (masteryLevelsStr) {
       try {
         masteryLevels = JSON.parse(masteryLevelsStr);
-      } catch (e) {
+      } catch {
         console.error("Failed to parse mastery levels");
       }
     }

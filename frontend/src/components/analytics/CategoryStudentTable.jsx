@@ -1,45 +1,22 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   Users, 
   Search, 
   TrendingUp, 
   Award, 
-  BookOpen, 
   CheckCircle2, 
   XCircle, 
-  AlertCircle, 
   Compass, 
   ChevronLeft,
   ChevronRight, 
   BarChart3, 
-  Calendar, 
   Layers, 
-  ArrowUpRight, 
-  Database, 
   X, 
-  Lock 
 } from 'lucide-react';
 import { CORE_SUBJECTS, fetchStudentAttemptsFromApi, getStudentPapersHistory } from '../../data/studentAnalyticsData';
-
-export const isPreSchoolOrGrade1 = (gradeStr) => {
-  if (!gradeStr) return false;
-  const g = gradeStr.toLowerCase().trim();
-  return g.includes('pre') || g.includes('preschool') || g.includes('pre-school') || g.includes('grade 1') || g === '1';
-};
-
-export const getNumericGrade = (gradeStr) => {
-  if (!gradeStr) return 2;
-  const g = String(gradeStr).toLowerCase().trim();
-  if (g.includes('4')) return 4;
-  if (g.includes('3')) return 3;
-  if (g.includes('2')) return 2;
-  if (g.includes('1') || g.includes('pre')) return 1;
-  return 2;
-};
+import { getNumericGrade, isPreSchoolOrGrade1 } from '../../utils/studentGrade';
 
 const CategoryStudentTable = ({ subjectKey = 'math', students = [], loading = false }) => {
-  const navigate = useNavigate();
   const subject = CORE_SUBJECTS[subjectKey] || CORE_SUBJECTS.math;
 
   const [searchQuery, setSearchQuery] = useState('');

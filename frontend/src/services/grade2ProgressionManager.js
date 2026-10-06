@@ -40,7 +40,7 @@ export class Grade2ProgressionManager {
       if (saved) {
         return JSON.parse(saved);
       }
-    } catch (e) {}
+    } catch {}
 
     return this.getDefaultProgress();
   }
@@ -66,7 +66,7 @@ export class Grade2ProgressionManager {
   saveProgress() {
     try {
       localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(this.progress));
-    } catch (e) {}
+    } catch {}
   }
 
   getProgress() {
@@ -227,7 +227,7 @@ export class Grade2ProgressionManager {
       if (res.ok) {
         return await res.json();
       }
-    } catch (e) {}
+    } catch {}
     return null;
   }
 }

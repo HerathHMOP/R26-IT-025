@@ -7,7 +7,7 @@
 export const getItem = (key) => {
   try {
     return sessionStorage.getItem(key) || localStorage.getItem(key);
-  } catch (e) {
+  } catch {
     return null;
   }
 };

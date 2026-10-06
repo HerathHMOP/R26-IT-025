@@ -16,7 +16,7 @@ import {
   fetchStudentsAnalyticsFromApi, 
   createBlankStudentProfile
 } from '../../data/studentAnalyticsData';
-import { isPreSchoolOrGrade1 } from './CategoryStudentTable';
+import { isPreSchoolOrGrade1 } from '../../utils/studentGrade';
 import { getItem } from '../../utils/storage';
 
 const StudentAnalyticsOverview = ({ initialStudentId = 'std_001', isTeacherView = false }) => {
