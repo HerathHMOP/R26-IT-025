@@ -1,7 +1,11 @@
 # Dependencies
 node_modules/
-.pnp
-.pnp.js
+dist/
+build/
+*.onnx
+*.bin
+*.pt
+*.weights
 
 # Environment variables & secrets
 .env
