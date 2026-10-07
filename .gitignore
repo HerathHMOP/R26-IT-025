@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+dist/
+build/
+*.onnx
+*.bin
+*.pt
+*.weights
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data & temp uploads
+temp/
+tmp/
+uploads/
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
