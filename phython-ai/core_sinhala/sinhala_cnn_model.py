@@ -25,7 +25,7 @@ class SinhalaCharacterCNN(nn.Module):
       - 3 Conv-BatchNorm-ReLU-MaxPool feature extractor blocks
       - Global Average Pooling & Dropout for strong regularization
       - Fully-Connected Dense classifier with Softmax output
-    
+    """
     def __init__(self, num_classes=NUM_CLASSES):
         super(SinhalaCharacterCNN, self).__init__()
         
