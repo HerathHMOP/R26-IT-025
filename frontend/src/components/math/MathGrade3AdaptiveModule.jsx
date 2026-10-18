@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RotateCcw, Lock, Camera, Eye, Smile, Frown, Meh, AlertCircle } from 'lucide-react';
 import * as faceapi from 'face-api.js';
-import { GRADE3_DOMAINS } from '../../data/math/grade3_math_curriculum';
-import questionData from '../../data/math/grade3_question_pool.json';
+import { GRADE4_DOMAINS } from '../../data/math/grade4_math_curriculum';
+import questionData from '../../data/math/grade4_question_pool.json';
 import { recordStudentTestMarks, recordStudentQuestionAttempts } from '../../data/studentAnalyticsData';
 import { getItem } from '../../utils/storage';
 import { translateOption } from '../../utils/optionTranslator';
@@ -101,20 +101,20 @@ const PAPERS_CONFIG = [
   }
 ];
 
-export default function MathGrade3AdaptiveModule({ onExit }) {
+export default function MathGrade4AdaptiveModule({ onExit }) {
   const navigate = useNavigate();
   const pool = questionData.questions || [];
-  const isEnglish = getItem('studentMedium') === 'English';
-
   // View: 'papers_hub' | 'quiz' | 'report'
   const [viewState, setViewState] = useState('papers_hub');
   const [activePaperId, setActivePaperId] = useState(1);
 
   // Medium mode state: 'English' | 'Sinhala' | 'Both'
   const [langMode, setLangMode] = useState(() => {
-    const saved = getItem('studentMedium');
-    return saved === 'English' ? 'English' : 'Sinhala';
+    const saved = getItem('studentMedium') || getItem('medium') || getItem('preferredLanguage');
+    return (saved || '').toLowerCase() === 'english' ? 'English' : 'Sinhala';
   });
+
+  const isEnglish = (getItem('studentMedium') || getItem('medium') || '').toLowerCase() === 'english' || langMode === 'English';
 
   // Quiz State (20 Questions)
   const [qNum, setQNum] = useState(1);
@@ -292,7 +292,7 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
   // 20-Skill Mastery Vector (0 to 100%)
   const [skillMastery, setSkillMastery] = useState(() => {
     const init = {};
-    Object.values(GRADE3_DOMAINS).forEach(dom => {
+    Object.values(GRADE4_DOMAINS).forEach(dom => {
       dom.skills.forEach(s => {
         init[s.id] = 50.0;
       });
@@ -310,8 +310,8 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
     try {
       const studentKey = getActiveStudentKey();
       if (!studentKey) return {};
-      const isDefault = studentKey === 'chamalka' || studentKey === 'std_002';
-      const stored = localStorage.getItem(`g3_math_paper_history_${studentKey}`) || (isDefault ? localStorage.getItem('g3_math_paper_history') : null);
+      const isDefault = studentKey === 'hiruni' || studentKey === 'std_003';
+      const stored = localStorage.getItem(`g4_math_paper_history_${studentKey}`) || (isDefault ? localStorage.getItem('g4_math_paper_history') : null);
       return stored ? JSON.parse(stored) : {};
     } catch (e) {
       return {};
@@ -352,7 +352,7 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
     setPaperHistory(updated);
     try {
       if (studentKey) {
-        localStorage.setItem(`g3_math_paper_history_${studentKey}`, JSON.stringify(updated));
+        localStorage.setItem(`g4_math_paper_history_${studentKey}`, JSON.stringify(updated));
       }
     } catch (e) {}
 
@@ -375,7 +375,7 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
 
     if (resultData.history && Array.isArray(resultData.history)) {
       const attemptItems = resultData.history.map((h, idx) => ({
-        questionId: `Gr.3 P0${paperId} • Q${h.qNum || (idx + 1)}`,
+        questionId: `Gr.4 P0${paperId} • Q${h.qNum || (idx + 1)}`,
         skillId: h.skillId || 'Mathematics Operations',
         studentAnswer: String(h.selectedOption ?? '—'),
         correctAnswer: String(h.correctAnswer ?? '—'),
@@ -388,7 +388,7 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
         studentId,
         name: studentName,
         module: 'math',
-        grade: 3,
+        grade: 4,
         paperNumber: Number(paperId),
         attempts: attemptItems
       });
@@ -406,13 +406,13 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
       try {
         const studentKey = getActiveStudentKey();
         if (studentKey) {
-          localStorage.removeItem(`g3_math_paper_history_${studentKey}`);
+          localStorage.removeItem(`g4_math_paper_history_${studentKey}`);
         }
-        localStorage.removeItem('g3_math_paper_history');
+        localStorage.removeItem('g4_math_paper_history');
       } catch (e) {}
 
       const init = {};
-      Object.values(GRADE3_DOMAINS).forEach(dom => {
+      Object.values(GRADE4_DOMAINS).forEach(dom => {
         dom.skills.forEach(s => {
           init[s.id] = 50.0;
         });
@@ -436,9 +436,9 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
       try {
         const studentKey = getActiveStudentKey();
         if (studentKey) {
-          localStorage.setItem(`g3_math_paper_history_${studentKey}`, JSON.stringify(updated));
+          localStorage.setItem(`g4_math_paper_history_${studentKey}`, JSON.stringify(updated));
         }
-        localStorage.setItem('g3_math_paper_history', JSON.stringify(updated));
+        localStorage.setItem('g4_math_paper_history', JSON.stringify(updated));
       } catch (e) {}
     }
   };
@@ -466,7 +466,7 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
     setCurrentEmotion(isEnglish ? 'Focusing 😐' : 'අවධානයෙන් 😐');
 
     const init = {};
-    Object.values(GRADE3_DOMAINS).forEach(dom => {
+    Object.values(GRADE4_DOMAINS).forEach(dom => {
       dom.skills.forEach(s => {
         init[s.id] = 50.0;
       });
@@ -520,9 +520,9 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
 
     // 2. LocalStorage history for student
     try {
-      const storageKey = studentKey ? `g3_math_paper_history_${studentKey}` : null;
+      const storageKey = studentKey ? `g4_math_paper_history_${studentKey}` : null;
       const rawStudent = storageKey ? localStorage.getItem(storageKey) : null;
-      const rawDefault = isDefault ? localStorage.getItem('g3_math_paper_history') : null;
+      const rawDefault = isDefault ? localStorage.getItem('g4_math_paper_history') : null;
       const stored = rawStudent || rawDefault;
       if (stored) {
         const parsed = JSON.parse(stored);
@@ -559,11 +559,11 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
     if (nextQNum === 1) {
       let paperStartingSkills = [];
       if (pId === 1) {
-        paperStartingSkills = ['D1_S1_COUNTING', 'D1_S2_NUMBER_READING', 'D2_S1_ADDITION', 'D2_S2_SUBTRACTION'];
+        paperStartingSkills = ['G4_D1_S1_PLACE_VALUE_10000', 'G4_D1_S2_ROMAN_NUMERALS', 'G4_D2_S1_ADDITION_4DIGIT', 'G4_D2_S2_SUBTRACTION_4DIGIT'];
       } else if (pId === 2) {
-        paperStartingSkills = ['D3_S1_LENGTH', 'D3_S4_TIME', 'D4_S1_2D_SHAPES', 'D1_S3_PLACE_VALUE'];
+        paperStartingSkills = ['G4_D3_S1_LENGTH_PERIMETER', 'G4_D3_S4_TIME_CALENDAR', 'G4_D4_S1_ANGLES_LINES', 'G4_D1_S3_ROUNDING_COMPARING'];
       } else {
-        paperStartingSkills = ['D2_S3_MULTIPLICATION', 'D2_S4_DIVISION', 'D4_S2_3D_SOLIDS', 'D3_S5_MONEY'];
+        paperStartingSkills = ['G4_D2_S3_MULTIPLICATION', 'G4_D2_S4_DIVISION', 'G4_D4_S2_2D_AREA_SHAPES', 'G4_D3_S5_MONEY_BILLS'];
       }
       targetSkillId = paperStartingSkills[Math.floor(Math.random() * paperStartingSkills.length)];
     } else if (nextQNum === 20) {
@@ -716,6 +716,7 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
       questionTextSi: currentQuestion.text_si,
       questionTextEn: currentQuestion.text_en,
       visual: currentQuestion.visual,
+      explanationVisual: currentQuestion.explanation_visual,
       emotion: currentEmotion,
       confusionScore: Math.round(avgConfusion * 100) / 100
     };
@@ -763,7 +764,7 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
   const totalCorrect = history.filter(h => h.isCorrect).length;
   const overallAccuracy = history.length > 0 ? Math.round((totalCorrect / history.length) * 100) : 0;
 
-  const domainSummaries = Object.entries(GRADE3_DOMAINS).map(([domId, dom]) => {
+  const domainSummaries = Object.entries(GRADE4_DOMAINS).map(([domId, dom]) => {
     const domSkillIds = new Set(dom.skills.map(s => s.id));
     const domHistory = history.filter(h => domSkillIds.has(h.skillId));
     const askedCount = domHistory.length;
@@ -789,7 +790,7 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
   const strongestSkills = [...sortedSkills].reverse().slice(0, 2);
 
   const getSkillName = (sid) => {
-    for (const dom of Object.values(GRADE3_DOMAINS)) {
+    for (const dom of Object.values(GRADE4_DOMAINS)) {
       for (const s of dom.skills) {
         if (s.id === sid) return { 
           si: s.name_si || s.name_en || sid, 
@@ -848,16 +849,34 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
             <span>{viewState === 'papers_hub' ? (isEnglish ? 'Dashboard' : 'Dashboard එකට') : (isEnglish ? 'Choose Paper' : 'ප්‍රශ්න පත්‍ර තෝරන්න')}</span>
           </button>
 
-          {viewState === 'papers_hub' && Object.keys(paperHistory).length > 0 && (
+          <div className="flex items-center gap-2">
+            {viewState === 'papers_hub' && Object.keys(paperHistory).length > 0 && (
+              <button
+                onClick={handleResetAllPapers}
+                className="flex items-center gap-2 px-4 py-2.5 bg-rose-50 hover:bg-rose-100 border-2 border-rose-200 hover:border-rose-300 text-rose-700 font-black text-xs sm:text-sm rounded-2xl shadow-sm hover:shadow transition-all cursor-pointer"
+                title={isEnglish ? "Reset all papers to initial state" : "සියලුම ප්‍රශ්න පත්‍ර මුල සිට නැවත සකසන්න"}
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>{isEnglish ? 'Reset All Papers' : 'මුල සිට නැවත සකසන්න'}</span>
+              </button>
+            )}
+
+            {/* Language / Medium Switcher Pill */}
             <button
-              onClick={handleResetAllPapers}
-              className="flex items-center gap-2 px-4 py-2.5 bg-rose-50 hover:bg-rose-100 border-2 border-rose-200 hover:border-rose-300 text-rose-700 font-black text-xs sm:text-sm rounded-2xl shadow-sm hover:shadow transition-all cursor-pointer"
-              title={isEnglish ? "Reset all papers to initial state" : "සියලුම ප්‍රශ්න පත්‍ර මුල සිට නැවත සකසන්න"}
+              onClick={() => {
+                const nextLang = isEnglish ? 'Sinhala' : 'English';
+                setLangMode(nextLang);
+                try {
+                  localStorage.setItem('studentMedium', nextLang);
+                } catch (e) {}
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 sm:py-2 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-400 text-blue-700 font-black text-xs sm:text-sm rounded-2xl shadow-xs transition-all cursor-pointer"
+              title={isEnglish ? "Switch to Sinhala Medium (සිංහල මාධ්‍යයට මාරු වන්න)" : "Switch to English Medium"}
             >
-              <RotateCcw className="w-4 h-4" />
-              <span>{isEnglish ? 'Reset All Papers' : 'මුල සිට නැවත සකසන්න'}</span>
+              <span className="text-sm">🌐</span>
+              <span>{isEnglish ? 'English Medium' : 'සිංහල මාධ්‍යය'}</span>
             </button>
-          )}
+          </div>
 
           {viewState === 'quiz' && (
             <div className="flex items-center gap-2 sm:gap-2.5">
@@ -901,14 +920,14 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
             <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border-2 border-blue-100 shadow-xl text-center relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-100 rounded-full blur-2xl opacity-50"></div>
               <div className="inline-block bg-blue-100 text-blue-800 font-black text-xs px-4 py-1.5 rounded-full mb-3 uppercase tracking-wider">
-                {isEnglish ? 'Grade 3 • Mathematics' : '3 ශ්‍රේණිය • ගණිතය'}
+                {isEnglish ? 'Grade 4 • Mathematics' : '4 ශ්‍රේණිය • ගණිතය'}
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-slate-800 mb-2">
                 {isEnglish ? 'Adaptive Test Papers System' : 'අනුවර්තී ප්‍රශ්න පත්‍ර පද්ධතිය'}
               </h1>
               <p className="text-slate-600 font-bold text-sm sm:text-base max-w-2xl mx-auto">
                 {isEnglish 
-                  ? '3 Adaptive Test Papers with 20 questions each, covering all 20 skills in Grade 3 Sri Lanka National Curriculum.' 
+                  ? '3 Adaptive Test Papers with 20 questions each, covering all 20 skills in Grade 4 Sri Lanka National Curriculum.' 
                   : 'ශ්‍රී ලංකා ජාතික විෂය නිර්දේශයේ කුසලතා 20 ආවරණය වන පරිදි සකස් කළ ප්‍රශ්න 20 බැගින් යුත් අනුවර්තී ප්‍රශ්න පත්‍ර 3ක්.'}
               </p>
             </div>
@@ -1122,7 +1141,7 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
             
             <div className="text-center pb-6 border-b border-slate-200">
               <h2 className="text-3xl font-black text-slate-800 mb-1">
-                {isEnglish ? `Grade 3 — Question Paper 0${activePaperId} Evaluation Report` : `3 ශ්‍රේණිය — ප්‍රශ්න පත්‍රය 0${activePaperId} ඇගයීම් වාර්තාව`}
+                {isEnglish ? `Grade 4 — Question Paper 0${activePaperId} Evaluation Report` : `4 ශ්‍රේණිය — ප්‍රශ්න පත්‍රය 0${activePaperId} ඇගයීම් වාර්තාව`}
               </h2>
               <p className="text-sm text-slate-500 font-bold">
                 {isEnglish ? '20 Skills Adaptive Analysis' : 'කුසලතා 20 අනුවර්තී විශ්ලේෂණය'}
@@ -1330,10 +1349,10 @@ export default function MathGrade3AdaptiveModule({ onExit }) {
                         ? (h.questionTextEn || pool.find(q => q.id === h.questionId)?.text_en || h.questionTextSi) 
                         : h.questionTextSi}
                     </p>
-                    {(h.visual || pool.find(q => q.id === h.questionId)?.visual) && (
+                    {(h.explanationVisual || h.visual || pool.find(q => q.id === h.questionId)?.explanation_visual || pool.find(q => q.id === h.questionId)?.visual) && (
                       <div className="my-2 flex justify-start">
                          <MathQuestionVisual 
-                           visual={h.visual || pool.find(q => q.id === h.questionId)?.visual} 
+                           visual={h.explanationVisual || h.visual || pool.find(q => q.id === h.questionId)?.explanation_visual || pool.find(q => q.id === h.questionId)?.visual} 
                            isEnglish={isEnglish} 
                            compact={true} 
                          />
